@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0.5in; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Stock Tracker — Les Amis</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#D97757;--gold-light:#FBEDE7;--gold-dark:#B0512F;
+  --ink:#141413;--ink-light:#44423D;--ink-faint:#88857C;
+  --cream:#FAF9F5;--cream-dark:#E8E6DC;--white:#FFFFFF;
+  --danger:#C0392B;--danger-light:#FDECEA;--danger-border:#F5B7B1;
+  --warn:#D68910;--warn-light:#FEF9E7;--warn-border:#F9E79F;
+  --ok:#1E8449;--ok-light:#EAFAF1;--ok-border:#A9DFBF;
+  --blue:#4A7BA6;--blue-light:#EDF3F9;
+  --purple:#788C5D;--purple-light:#EEF1E8;
+  --border:#E8E6DC;--shadow:0 1px 3px rgba(20,20,19,.06),0 4px 16px rgba(20,20,19,.04);
+}
+body{font-family:'Lora',serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6;}
+header{background:var(--ink);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:200;}
+.logo{display:inline-flex;align-items:center;font-family:'Poppins',sans-serif;color:var(--gold);font-size:20px;letter-spacing:.06em;}
+.logo img{height:32px;display:block;background:var(--cream);padding:3px 8px;border-radius:7px;}
+.logo span{color:rgba(255,255,255,.55);font-family:'Poppins',sans-serif;font-size:11px;font-weight:300;margin-left:12px;letter-spacing:.12em;text-transform:uppercase;}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.btn-sm{padding:5px 13px;font-size:12px;font-weight:500;border-radius:6px;cursor:pointer;font-family:'Lora',serif;letter-spacing:.04em;transition:all .15s;white-space:nowrap;}
+.btn-dark{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.btn-dark:hover{background:rgba(255,255,255,.18);}
+.app{display:flex;min-height:calc(100vh - 60px);}
+.sidebar{width:210px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);padding:1rem 0;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
+.sidebar-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:.5rem 1.2rem .3rem;}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:7px 1.2rem;font-size:13px;color:var(--ink-light);cursor:pointer;transition:all .12s;border-left:2px solid transparent;}
+.sidebar-item:hover{background:var(--cream);color:var(--ink);}
+.sidebar-item.active{background:var(--gold-light);color:var(--gold-dark);border-left-color:var(--gold);font-weight:500;}
+.sidebar-item .icon{font-size:14px;width:18px;text-align:center;}
+.sidebar-divider{height:1px;background:var(--border);margin:.4rem 1.2rem;}
+.main{flex:1;padding:1.75rem;overflow-x:hidden;}
+.page{display:none;}.page.active{display:block;}
+.page-title{font-family:'Poppins',sans-serif;font-size:26px;font-weight:400;color:var(--ink);margin-bottom:3px;}
+.page-subtitle{font-size:12px;color:var(--ink-faint);margin-bottom:1.5rem;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.1rem;box-shadow:var(--shadow);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.9rem;}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;margin-bottom:.7rem;}
+.alert-danger{background:var(--danger-light);color:var(--danger);border:1px solid var(--danger-border);}
+.alert-warn{background:var(--warn-light);color:#7D6608;border:1px solid var(--warn-border);}
+.alert-ok{background:var(--ok-light);color:var(--ok);border:1px solid var(--ok-border);}
+.alert-info{background:var(--blue-light);color:var(--blue);border:1px solid #AED6F1;}
+.stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:1.1rem;}
+.stock-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;position:relative;transition:box-shadow .15s;}
+.stock-card:hover{box-shadow:0 4px 20px rgba(26,24,20,.08);}
+.stock-card.low{border-color:var(--danger);background:var(--danger-light);}
+.stock-card.warn{border-color:var(--warn);background:var(--warn-light);}
+.stock-card.dev{border-color:var(--purple);background:var(--purple-light);opacity:.85;}
+.sc-name{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:6px;line-height:1.3;}
+.sc-qty{font-family:'Poppins',sans-serif;font-size:30px;font-weight:300;line-height:1;color:var(--ink);}
+.sc-qty.low{color:var(--danger);}.sc-qty.warn{color:var(--warn);}
+.sc-threshold{font-size:10px;color:var(--ink-faint);margin-top:3px;}
+.sc-pending{font-size:11px;color:var(--blue);margin-top:2px;}
+.sc-badge{position:absolute;top:8px;right:8px;padding:1px 7px;border-radius:99px;font-size:9px;font-weight:700;letter-spacing:.04em;}
+.badge-low{background:var(--danger);color:#fff;}.badge-warn{background:var(--warn);color:#fff;}
+.badge-dev{background:var(--purple);color:#fff;}.badge-order{background:var(--blue);color:#fff;}
+.prog-bg{height:4px;border-radius:99px;background:var(--cream-dark);overflow:hidden;margin-top:5px;}
+.prog-fill{height:100%;border-radius:99px;transition:width .4s;}
+.form-row{display:grid;gap:10px;margin-bottom:10px;}
+.form-2{grid-template-columns:1fr 1fr;}.form-3{grid-template-columns:1fr 1fr 1fr;}.form-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.field label{display:block;font-size:10px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;}
+.field input,.field select,.field textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'Lora',serif;font-size:13px;color:var(--ink);background:var(--cream);transition:border-color .15s;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);background:var(--white);}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8480'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px;background-color:var(--cream);}
+.field select:focus{background-color:var(--white);}
+.field textarea{resize:vertical;min-height:60px;}
+.btn{padding:8px 16px;border-radius:7px;font-family:'Lora',serif;font-size:13px;font-weight:500;cursor:pointer;letter-spacing:.04em;transition:all .15s;white-space:nowrap;border:none;}
+.btn-primary{background:var(--ink);color:#fff;}.btn-primary:hover{background:var(--ink-light);}
+.btn-ghost{background:none;color:var(--ink-light);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--ink-light);background:var(--cream);}
+.btn-gold{background:var(--gold);color:#fff;}.btn-gold:hover{background:var(--gold-dark);}
+.btn-del{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:18px;line-height:1;padding:2px 6px;border-radius:4px;transition:all .15s;}
+.btn-del:hover{background:var(--danger-light);color:var(--danger);}
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--cream);}
+th{padding:9px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--border);}
+td{padding:10px 13px;border-bottom:1px solid var(--cream-dark);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--cream);}
+.td-num{font-weight:600;text-align:right;}.td-low{color:var(--danger);font-weight:600;}.td-warn{color:var(--warn);font-weight:600;}
+.empty-row td{text-align:center;padding:2.5rem;color:var(--ink-faint);font-style:italic;}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem;overflow-x:auto;}
+.tab{padding:8px 18px;font-size:13px;font-weight:500;background:none;border:none;cursor:pointer;color:var(--ink-faint);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+.tab:hover{color:var(--ink);}.tab.active{color:var(--gold-dark);border-bottom-color:var(--gold);}
+.status-pill{padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;letter-spacing:.04em;}
+.sp-ok{background:var(--ok-light);color:var(--ok);}.sp-low{background:var(--danger-light);color:var(--danger);}
+.sp-warn{background:var(--warn-light);color:var(--warn);}.sp-pending{background:var(--blue-light);color:var(--blue);}
+.sp-dev{background:var(--purple-light);color:var(--purple);}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:1.25rem;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;}
+.kpi-label{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;}
+.kpi-val{font-family:'Poppins',sans-serif;font-size:28px;font-weight:300;color:var(--ink);line-height:1;}
+.kpi-val.danger{color:var(--danger);}.kpi-val.warn{color:var(--warn);}
+.modal-overlay{position:fixed;inset:0;background:rgba(26,24,20,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.modal{background:var(--white);border-radius:14px;padding:1.75rem;width:560px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(26,24,20,.2);}
+.modal h3{font-family:'Poppins',sans-serif;font-size:22px;font-weight:400;margin-bottom:5px;}
+.modal p{font-size:13px;color:var(--ink-faint);margin-bottom:1.1rem;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:1.1rem;}
+/* To Do */
+.todo-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:all .15s;}
+.todo-item.done{opacity:.45;text-decoration:line-through;}
+.todo-item.critical{border-left:3px solid var(--danger);}
+.todo-item.warn-item{border-left:3px solid var(--warn);}
+.todo-item.manual{border-left:3px solid var(--gold);}
+.todo-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;color:transparent;}
+.todo-check:hover{border-color:var(--gold);background:var(--gold-light);}
+.todo-check:hover::after{content:"✓";color:var(--gold-dark);font-size:11px;}
+.cat-header{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.menu-toggle{display:none;}
+.nav-scrim{display:none;}
+@media(max-width:800px){
+  .menu-toggle{display:inline-flex;align-items:center;}
+  .sidebar{position:fixed;top:60px;left:0;height:calc(100vh - 60px);z-index:190;transform:translateX(-100%);transition:transform .22s ease;box-shadow:0 12px 40px rgba(26,24,20,.25);}
+  body.nav-open .sidebar{transform:translateX(0);}
+  .nav-scrim{position:fixed;inset:60px 0 0 0;background:rgba(26,24,20,.4);z-index:185;}
+  body.nav-open .nav-scrim{display:block;}
+  .form-2,.form-3,.form-4{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#1A1814"/>
+    <g transform="translate(30,30)" fill="none" stroke="#C9A96E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="0" y="6" width="40" height="34" rx="3"/>
+      <path d="M0 16 H40"/>
+      <path d="M12 6 V0 H28 V6"/>
+      <path d="M14 27 H26"/>
+    </g>
+  </svg>
+</template>
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="btn-sm btn-dark menu-toggle" onclick="toggleSidebar()" aria-label="Open menu" style="font-size:15px;padding:5px 11px;">☰</button>
+    <div class="logo"><img src="assets/logo-lesamis.svg" alt="Les Amis"><span>Retail Stock Tracker</span></div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-sm btn-dark" onclick="exportData()">⬇ Export JSON</button>
+    <label class="btn-sm btn-dark" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+  </div>
+</header>
+<div class="nav-scrim" onclick="toggleSidebar()"></div>
+
+<div class="app">
+<nav class="sidebar">
+  <div class="sidebar-label">Overview</div>
+  <div class="sidebar-item active" data-page="dashboard" onclick="nav('dashboard')"><span class="icon">📊</span>Dashboard</div>
+  <div class="sidebar-item" data-page="todo" onclick="nav('todo')"><span class="icon">✅</span>To Do <span id="todo-badge" style="margin-left:auto;background:var(--danger);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;display:none;"></span></div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label">Log Operations</div>
+  <div class="sidebar-item" data-page="op-event" onclick="nav('op-event')"><span class="icon">🎉</span>Event</div>
+  <div class="sidebar-item" data-page="op-welcome" onclick="nav('op-welcome')"><span class="icon">📦</span>Welcome Pack</div>
+  <div class="sidebar-item" data-page="op-prospect" onclick="nav('op-prospect')"><span class="icon">🤝</span>Prospect Meeting</div>
+  <div class="sidebar-item" data-page="op-restaurant" onclick="nav('op-restaurant')"><span class="icon">🍽</span>Restaurant Update</div>
+  <div class="sidebar-item" data-page="op-manual" onclick="nav('op-manual')"><span class="icon">✏️</span>Manual Entry</div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label">Stock by Location</div>
+  <div class="sidebar-item" data-page="loc-hq" onclick="nav('loc-hq')"><span class="icon">🏢</span>Paris HQ</div>
+  <div class="sidebar-item" data-page="loc-stock" onclick="nav('loc-stock')"><span class="icon">📦</span>Paris Stock</div>
+  <div class="sidebar-item" data-page="loc-london" onclick="nav('loc-london')"><span class="icon">🏛</span>16CS London</div>
+  <div class="sidebar-item" data-page="loc-mbe" onclick="nav('loc-mbe')"><span class="icon">📮</span>MBE</div>
+  <div class="sidebar-item" data-page="loc-restaurants" onclick="nav('loc-restaurants')"><span class="icon">🍽</span>Restaurants</div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label">Manage</div>
+  <div class="sidebar-item" data-page="orders" onclick="nav('orders')"><span class="icon">🛒</span>Orders</div>
+  <div class="sidebar-item" data-page="transfers" onclick="nav('transfers')"><span class="icon">↔️</span>Transfers</div>
+  <div class="sidebar-item" data-page="history" onclick="nav('history')"><span class="icon">📋</span>History</div>
+  <div class="sidebar-item" data-page="budget" onclick="nav('budget')"><span class="icon">💰</span>Budget</div>
+  <div class="sidebar-item" data-page="catalogue" onclick="nav('catalogue')"><span class="icon">➕</span>Catalogue</div>
+  <div class="sidebar-item" data-page="settings" onclick="nav('settings')"><span class="icon">🏭</span>Suppliers</div>
+</nav>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Dashboard</div>
+  <div class="page-subtitle">Real-time stock overview across all locations</div>
+  <div class="alert alert-info" style="margin-bottom:1.1rem;">
+    <span>💾</span>
+    <div>Your data is saved automatically in this browser only — nothing is sent to a server. To keep your progress safe, use ⬇ Export JSON regularly to back it up, and avoid clearing your browser data. Switching browsers or devices? Re-import your backup with ⬆ Import JSON.</div>
+  </div>
+  <div id="dash-alerts"></div>
+  <div class="kpi-grid" id="dash-kpis"></div>
+  <div class="tabs" id="dash-tabs">
+    <button class="tab active" onclick="switchDashTab('overview')">All Items</button>
+    <button class="tab" onclick="switchDashTab('hq')">Paris HQ</button>
+    <button class="tab" onclick="switchDashTab('stock')">Paris Stock</button>
+    <button class="tab" onclick="switchDashTab('london')">16CS London</button>
+    <button class="tab" onclick="switchDashTab('mbe')">MBE</button>
+    <button class="tab" onclick="switchDashTab('restaurants')">Restaurants</button>
+  </div>
+  <div id="dash-grid-container"></div>
+</div>
+
+<!-- TO DO -->
+<div class="page" id="page-todo">
+  <div class="page-title">To Do</div>
+  <div class="page-subtitle">Stock alerts + your manual tasks — tick to mark done</div>
+  <div class="card">
+    <div class="card-title">Add a Manual Task</div>
+    <div class="form-row form-2">
+      <div class="field"><label>Task</label><input type="text" id="todo-text" placeholder="e.g. Bring 50 name tags to Ramatuelle"></div>
+      <div class="field"><label>Priority</label>
+        <select id="todo-priority">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;"><button class="btn btn-primary" onclick="addManualTodo()">Add Task</button></div>
+  </div>
+  <div id="todo-content"></div>
+</div>
+
+<!-- EVENT -->
+<div class="page" id="page-op-event">
+  <div class="page-title">Log an Event</div>
+  <div class="page-subtitle">Record material distribution — location set per item</div>
+  <div class="card">
+    <div class="form-row form-3">
+      <div class="field"><label>Event Name</label><input type="text" id="ev-name" placeholder="e.g. Committee Drinks June"></div>
+      <div class="field"><label>Date</label><input type="date" id="ev-date"></div>
+      <div class="field"><label>Event Type</label>
+        <select id="ev-type">
+          <option value="">— Select —</option>
+          <option>Les Amis Event</option><option>Committee Event</option>
+          <option>Press Event</option><option>Corporate Event</option>
+          <option>Private Event</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-title">Materials distributed</div>
+    <div id="ev-items-container"></div>
+    <button class="btn btn-ghost" style="margin-bottom:1rem;" onclick="addEventItem()">+ Add item</button>
+    <div class="card-title">Event Pack (optional)</div>
+    <div class="form-row form-3">
+      <div class="field"><label>Les Amis Bags</label><input type="number" id="ev-bags" min="0" placeholder="0"></div>
+      <div class="field"><label>Comp Splits</label><input type="number" id="ev-splits" min="0" placeholder="0"></div>
+      <div class="field"><label>Name Tags</label><input type="number" id="ev-nametags" min="0" placeholder="0"></div>
+    </div>
+    <div class="field" style="margin-bottom:1rem;"><label>Notes</label><textarea id="ev-notes"></textarea></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-ghost" onclick="clearEventForm()">Clear</button>
+      <button class="btn btn-primary" onclick="submitEvent()">Save Event</button>
+    </div>
+    <div id="ev-feedback" class="feedback"></div>
+  </div>
+</div>
+
+<!-- WELCOME PACK -->
+<div class="page" id="page-op-welcome">
+  <div class="page-title">Log a Welcome Pack</div>
+  <div class="page-subtitle">Auto-deducts all pack components from MBE stock</div>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchWelcomeTab('patron')">Patron Pack</button>
+      <button class="tab" onclick="switchWelcomeTab('annual')">Annual Pack</button>
+    </div>
+    <div id="wp-patron">
+      <div class="alert alert-info">📦 Components: <strong>Box+Fourreau · Restaurant Brochure · Private Office Brochure · Reservation Card · Astrid's Letter</strong> (knife sent direct by supplier)</div>
+      <div class="form-row form-2">
+        <div class="field"><label>Member Name</label><input type="text" id="wp-p-name"></div>
+        <div class="field"><label>Date Sent</label><input type="date" id="wp-p-date"></div>
+      </div>
+      <div class="form-row form-2">
+        <div class="field"><label>Packs</label><input type="number" id="wp-p-qty" min="1" value="1"></div>
+        <div class="field"><label>From</label><select id="wp-p-loc"><option value="MBE">MBE</option><option value="Paris HQ">Paris HQ</option></select></div>
+      </div>
+      <div class="field" style="margin-bottom:1rem;"><label>Notes</label><textarea id="wp-p-notes"></textarea></div>
+      <div style="display:flex;justify-content:flex-end;"><button class="btn btn-primary" onclick="submitWelcomePack('patron')">Save & Deduct Stock</button></div>
+      <div id="wp-p-feedback" class="feedback"></div>
+    </div>
+    <div id="wp-annual" style="display:none;">
+      <div class="alert alert-warn">⚠ Annual welcome pack is currently <strong>In Development</strong>. Stock tracking will be activated once ready.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROSPECT -->
+<div class="page" id="page-op-prospect">
+  <div class="page-title">Log a Prospect Meeting</div>
+  <div class="card">
+    <div class="form-row form-3">
+      <div class="field"><label>Prospect Name</label><input type="text" id="pr-name"></div>
+      <div class="field"><label>Date</label><input type="date" id="pr-date"></div>
+      <div class="field"><label>Meeting Type</label>
+        <select id="pr-type">
+          <option>Site Tour — Building Visit</option>
+          <option>Direct Prospect Meeting</option>
+          <option>Investor Presentation</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:.8rem;"><label>Notes</label><input type="text" id="pr-notes" placeholder="Membership tier, referral…"></div>
+    <div class="card-title">Materials given</div>
+    <div id="pr-items-container"></div>
+    <button class="btn btn-ghost" style="margin-bottom:1rem;" onclick="addProspectItem()">+ Add item</button>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-ghost" onclick="clearProspectForm()">Clear</button>
+      <button class="btn btn-primary" onclick="submitProspect()">Save Meeting</button>
+    </div>
+    <div id="pr-feedback" class="feedback"></div>
+  </div>
+</div>
+
+<!-- RESTAURANT UPDATE -->
+<div class="page" id="page-op-restaurant">
+  <div class="page-title">Restaurant Monthly Update</div>
+  <div class="page-subtitle">Enter number of members visited — chouquette items deducted automatically (1 box + 1 bag + 1 postcard per member)</div>
+  <div class="card">
+    <div class="form-row form-2">
+      <div class="field"><label>Restaurant</label>
+        <select id="rest-name" onchange="previewRestaurantDeduction()">
+          <option>Loulou Paris</option><option>Loulou Ramatuelle</option><option>Loulou Pirate</option>
+          <option>Loulou Courchevel</option><option>Le Flandrin</option><option>Ralph's</option><option>Grand Café</option>
+        </select>
+      </div>
+      <div class="field"><label>Period</label><input type="month" id="rest-period"></div>
+    </div>
+    <div class="form-row form-2">
+      <div class="field"><label>Number of members visited</label><input type="number" id="rest-members" min="0" placeholder="0" oninput="previewRestaurantDeduction()"></div>
+      <div class="field"><label>Notes</label><input type="text" id="rest-notes" placeholder="Special occasions…"></div>
+    </div>
+    <div id="rest-preview" style="display:none;margin-bottom:1rem;"></div>
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary" onclick="submitRestaurantUpdate()">Save & Update Stock</button>
+    </div>
+    <div id="rest-feedback" class="feedback"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Chouquette Stock by Restaurant</div>
+    <div id="rest-stock-grid" class="stock-grid"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Event Items Stock by Restaurant (Bags · Splits · Name Tags)</div>
+    <div id="rest-event-grid" class="stock-grid"></div>
+  </div>
+</div>
+
+<!-- MANUAL ENTRY -->
+<div class="page" id="page-op-manual">
+  <div class="page-title">Manual Stock Entry</div>
+  <div class="page-subtitle">Log ad-hoc usage. Use bag &amp; split toggle for retail gifts.</div>
+  <div class="card">
+    <div class="form-row form-4">
+      <div class="field"><label>Date</label><input type="date" id="me-date"></div>
+      <div class="field"><label>Category</label>
+        <select id="me-cat" onchange="updateManualItems()">
+          <option value="">— Category —</option>
+          <option value="Brochures">Brochures</option>
+          <option value="Investor Brochures">Investor Brochures</option>
+          <option value="Welcome Pack — Patron">Welcome Pack — Patron</option>
+          <option value="Welcome Pack — Annual">Welcome Pack — Annual</option>
+          <option value="Event Materials">Event Materials</option>
+          <option value="Retail">Retail</option>
+          <option value="Stationery">Stationery</option>
+          <option value="Chouquettes">Chouquettes</option>
+        </select>
+      </div>
+      <div class="field"><label>Item</label><select id="me-item" onchange="updateManualLocations()"></select></div>
+      <div class="field"><label>Location</label><select id="me-loc"></select></div>
+    </div>
+    <div class="form-row form-2">
+      <div class="field"><label>Qty (– used, + added)</label><input type="number" id="me-qty" placeholder="e.g. -5 or +20" oninput="updateBagSplitPreview()"></div>
+      <div class="field"><label>Reason / Context</label><input type="text" id="me-reason" placeholder="e.g. Given to journalist…"></div>
+    </div>
+    <div id="me-bag-split-section" style="display:none;margin-bottom:1rem;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:10px 14px;background:var(--gold-light);border-radius:8px;border:1px solid var(--gold);">
+        <input type="checkbox" id="me-bag-split" style="width:auto;background:none;border:none;" onchange="updateBagSplitPreview()">
+        <span>Include <strong>1 Les Amis Bag + 1 Comp Split</strong> per unit given</span>
+      </label>
+      <div id="me-bag-split-preview" style="font-size:12px;color:var(--ink-faint);margin-top:5px;padding-left:4px;"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary" onclick="submitManual()">Save Entry</button>
+    </div>
+    <div id="me-feedback" class="feedback"></div>
+  </div>
+</div>
+
+<!-- LOCATION PAGES -->
+<div class="page" id="page-loc-hq"><div class="page-title">Paris HQ</div><div class="page-subtitle">Stock at Paris headquarters</div><div class="stock-grid" id="loc-hq-grid"></div></div>
+<div class="page" id="page-loc-stock"><div class="page-title">Paris Stock</div><div class="page-subtitle">Main warehouse stock Paris</div><div class="stock-grid" id="loc-stock-grid"></div></div>
+<div class="page" id="page-loc-london"><div class="page-title">16CS London</div><div class="page-subtitle">On-site at 16 Charles Street</div><div class="stock-grid" id="loc-london-grid"></div></div>
+<div class="page" id="page-loc-mbe"><div class="page-title">MBE — Dispatch Centre</div><div class="page-subtitle">Welcome pack components held at MBE</div><div class="stock-grid" id="loc-mbe-grid"></div></div>
+<div class="page" id="page-loc-restaurants">
+  <div class="page-title">Restaurants</div>
+  <div class="page-subtitle">Bags, Splits, Name Tags and Chouquette items held at each restaurant</div>
+  <div id="loc-rest-content"></div>
+</div>
+
+<!-- ORDERS -->
+<div class="page" id="page-orders">
+  <div class="page-title">Orders</div>
+  <div class="page-subtitle">Track purchase orders, budgets and delivery dates</div>
+  <div class="section-hdr"><div></div><button class="btn btn-primary" onclick="openOrderModal()">+ New Order</button></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date ordered</th><th>Item</th><th>Qty</th><th>Supplier</th><th style="text-align:right">Budget (€)</th><th style="text-align:right">Actual (€)</th><th>Est. Delivery</th><th>Notes</th><th>Status</th><th></th></tr></thead>
+    <tbody id="orders-body"></tbody>
+  </table></div>
+</div>
+
+<!-- TRANSFERS -->
+<div class="page" id="page-transfers">
+  <div class="page-title">Stock Transfers</div>
+  <div class="page-subtitle">Move stock between locations (including restaurants)</div>
+  <div class="card">
+    <div class="form-row form-3">
+      <div class="field"><label>Item</label><select id="tr-item" onchange="updateTransferLocs()"></select></div>
+      <div class="field"><label>From</label><select id="tr-from"></select></div>
+      <div class="field"><label>To</label><select id="tr-to"></select></div>
+    </div>
+    <div class="form-row form-3">
+      <div class="field"><label>Quantity</label><input type="number" id="tr-qty" min="1" placeholder="0"></div>
+      <div class="field"><label>Date</label><input type="date" id="tr-date"></div>
+      <div class="field"><label>Transferred by</label><input type="text" id="tr-by" placeholder="Name"></div>
+    </div>
+    <div class="field" style="margin-bottom:1rem;"><label>Reason</label><input type="text" id="tr-reason" placeholder="e.g. Event preparation…"></div>
+    <div style="display:flex;justify-content:flex-end;"><button class="btn btn-primary" onclick="submitTransfer()">Save Transfer</button></div>
+    <div id="tr-feedback" class="feedback"></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>From</th><th>To</th><th>By</th><th>Reason</th></tr></thead>
+    <tbody id="transfers-body"></tbody>
+  </table></div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="page-title">History</div>
+  <div class="page-subtitle">All stock movements — most recent first</div>
+  <div style="display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
+    <div class="field" style="margin:0;min-width:180px;"><select id="hist-item-filter" onchange="renderHistory()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--white);"><option value="all">All items</option></select></div>
+    <div class="field" style="margin:0;min-width:150px;"><select id="hist-type-filter" onchange="renderHistory()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--white);">
+      <option value="all">All types</option>
+      <option value="event">Event</option><option value="welcome_pack">Welcome Pack</option>
+      <option value="prospect">Prospect Meeting</option><option value="restaurant">Restaurant</option>
+      <option value="manual">Manual</option><option value="transfer">Transfer</option><option value="order">Order</option>
+    </select></div>
+    <span id="hist-count" style="font-size:12px;color:var(--ink-faint);align-self:center;"></span>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Type</th><th>Item</th><th>Location</th><th style="text-align:right">Qty</th><th>Details</th><th>Edit</th></tr></thead>
+    <tbody id="history-body"></tbody>
+  </table></div>
+</div>
+
+<!-- BUDGET -->
+<div class="page" id="page-budget">
+  <div class="page-title">Budget</div>
+  <div class="page-subtitle">Pre-opening marketing & membership budget — actuals updated via orders or manually</div>
+  <div id="budget-content"></div>
+</div>
+
+<!-- CATALOGUE -->
+<div class="page" id="page-catalogue">
+  <div class="page-title">Item Catalogue</div>
+  <div class="page-subtitle">Add new SKUs and manage item status</div>
+  <div class="card">
+    <div class="card-title">Add New Item</div>
+    <div class="form-row form-3">
+      <div class="field"><label>Item Name</label><input type="text" id="cat-name" placeholder="e.g. Terra Cotta Pouch"></div>
+      <div class="field"><label>Category</label>
+        <select id="cat-cat">
+          <option value="Retail">Retail</option><option value="Brochures">Brochures</option>
+          <option value="Investor Brochures">Investor Brochures</option>
+          <option value="Event Materials">Event Materials</option><option value="Stationery">Stationery</option>
+          <option value="Welcome Pack — Patron">Welcome Pack — Patron</option><option value="Welcome Pack — Annual">Welcome Pack — Annual</option>
+          <option value="Chouquettes">Chouquettes</option><option value="Crockery — 16CS">Crockery — 16CS</option>
+        </select>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="cat-status"><option value="active">Active</option><option value="development">In Development</option><option value="discontinued">Discontinued</option></select>
+      </div>
+    </div>
+    <div class="form-row form-3">
+      <div class="field"><label>Reorder Threshold</label><input type="number" id="cat-threshold" min="0" placeholder="0"></div>
+      <div class="field"><label>Initial Stock (Paris HQ)</label><input type="number" id="cat-stock" min="0" placeholder="0"></div>
+      <div class="field"><label>Budget allocated (€)</label><input type="number" id="cat-budget" min="0" placeholder="0.00" step="0.01"></div>
+    </div>
+    <div class="field" style="margin-bottom:1rem;"><label>Notes</label><input type="text" id="cat-note" placeholder="Usage context, supplier…"></div>
+    <button class="btn btn-primary" onclick="addCatalogueItem()">Add Item</button>
+    <div id="cat-feedback" class="feedback"></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;">
+      <div class="card-title" style="margin:0">All Items</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="cat-search" placeholder="Search…" oninput="renderCatalogue()" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12px;background:var(--cream);outline:none;width:160px;">
+        <select id="cat-filter-cat" onchange="renderCatalogue()" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12px;background:var(--cream);">
+          <option value="">All categories</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Reorder threshold</th><th>Locations</th><th>Total stock</th><th style="text-align:center">Actions</th></tr></thead>
+      <tbody id="catalogue-body"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">Suppliers</div>
+  <div class="card">
+    <div class="card-title">Suppliers</div>
+    <div style="display:flex;gap:10px;margin-bottom:1rem;align-items:flex-end;">
+      <div class="field" style="flex:1;margin:0;"><label>Add Supplier</label><input type="text" id="new-supplier" placeholder="Supplier name"></div>
+      <button class="btn btn-primary" onclick="addSupplier()">Add</button>
+    </div>
+    <div id="suppliers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal-overlay" id="order-modal" style="display:none" onclick="if(event.target===this)closeOrderModal()">
+<div class="modal">
+  <h3>New Purchase Order</h3>
+  <p>Record an order. Fill in actual delivery date to mark as already received.</p>
+  <div class="form-row form-2">
+    <div class="field"><label>Item</label><select id="ord-item"></select></div>
+    <div class="field"><label>Target Location</label><select id="ord-loc">
+      <option value="Paris HQ">Paris HQ</option><option value="Paris Stock">Paris Stock</option>
+      <option value="16CS London">16CS London</option><option value="MBE">MBE</option>
+    </select></div>
+  </div>
+  <div class="form-row form-3">
+    <div class="field"><label>Qty ordered</label><input type="number" id="ord-qty" min="1" placeholder="0"></div>
+    <div class="field"><label>Budget (€)</label><input type="number" id="ord-budget" placeholder="0.00" step="0.01"></div>
+    <div class="field"><label>Actual price (€)</label><input type="number" id="ord-price" placeholder="0.00" step="0.01"></div>
+  </div>
+  <div class="form-row form-2">
+    <div class="field"><label>Supplier</label><select id="ord-supplier"></select></div>
+    <div class="field"><label>Date ordered</label><input type="date" id="ord-date"></div>
+  </div>
+  <div class="form-row form-2">
+    <div class="field"><label>Est. delivery</label><input type="date" id="ord-est-delivery"></div>
+    <div class="field"><label>Actual delivery (if received)</label><input type="date" id="ord-actual-delivery"></div>
+  </div>
+  <div class="field" style="margin-bottom:10px;"><label>Notes / Issues</label><textarea id="ord-notes" style="min-height:50px;"></textarea></div>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeOrderModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="submitOrder()">Save Order</button>
+  </div>
+</div>
+</div>
+
+<!-- (Removed a duplicate catalogue edit modal that shared element IDs with
+     #catalogue-edit-modal below and broke item editing. The working editor is
+     #catalogue-edit-modal.) -->
+
+<!-- HISTORY EDIT MODAL -->
+<div class="modal-overlay" id="history-edit-modal" style="display:none" onclick="if(event.target===this)closeHistoryEdit()">
+<div class="modal">
+  <h3>Edit History Entry</h3>
+  <p>Correct stock movements. Changing qty/location will automatically reverse the old effect and apply the new one.</p>
+  <input type="hidden" id="he-id">
+  <div class="form-row form-2">
+    <div class="field"><label>Date</label><input type="date" id="he-date"></div>
+    <div class="field"><label>Location</label><select id="he-loc"></select></div>
+  </div>
+  <div class="form-row form-2">
+    <div class="field"><label>Qty change (+ added, − removed)</label><input type="number" id="he-delta" placeholder="e.g. -50 or +100"></div>
+    <div class="field"><label>Reference</label><input type="text" id="he-ref"></div>
+  </div>
+  <div class="field" style="margin-bottom:10px;"><label>Details / Notes</label><textarea id="he-details" style="min-height:50px;"></textarea></div>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeHistoryEdit()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveHistoryEdit()">Save Changes</button>
+  </div>
+</div>
+</div>
+
+<!-- CATALOGUE EDIT MODAL -->
+<div class="modal-overlay" id="catalogue-edit-modal" style="display:none" onclick="if(event.target===this)closeCatalogueEdit()">
+<div class="modal" style="width:640px;">
+  <h3>Edit Item</h3>
+  <p>Changes are saved immediately and persist across sessions.</p>
+  <input type="hidden" id="ce-id">
+  <div class="form-row form-2">
+    <div class="field"><label>Item Name</label><input type="text" id="ce-name"></div>
+    <div class="field"><label>Category</label>
+      <select id="ce-cat">
+        <option value="Brochures">Brochures</option>
+        <option value="Investor Brochures">Investor Brochures</option>
+        <option value="Welcome Pack — Patron">Welcome Pack — Patron</option>
+        <option value="Welcome Pack — Annual">Welcome Pack — Annual</option>
+        <option value="Event Materials">Event Materials</option>
+        <option value="Retail">Retail</option>
+        <option value="Stationery">Stationery</option>
+        <option value="Chouquettes">Chouquettes</option>
+        <option value="Crockery — 16CS">Crockery — 16CS</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row form-2">
+    <div class="field"><label>Status</label>
+      <select id="ce-status">
+        <option value="active">Active</option>
+        <option value="development">In Development</option>
+        <option value="discontinued">Discontinued</option>
+      </select>
+    </div>
+    <div class="field"><label>Reorder Threshold</label><input type="number" id="ce-threshold" min="0" placeholder="0"></div>
+  </div>
+  <div class="field" style="margin-bottom:10px;"><label>Notes</label><input type="text" id="ce-note" placeholder="Usage context, supplier…"></div>
+  <div class="field" style="margin-bottom:10px;">
+    <label>Locations (comma-separated, e.g. Paris HQ, Paris Stock, 16CS London)</label>
+    <input type="text" id="ce-locs" placeholder="Paris HQ, Paris Stock">
+    <div style="font-size:11px;color:var(--ink-faint);margin-top:3px;">Available: Paris HQ · Paris Stock · 16CS London · MBE · Loulou Paris · Loulou Ramatuelle · Loulou Pirate · Loulou Courchevel · Le Flandrin · Ralph's · Grand Café</div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeCatalogueEdit()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveCatalogueEdit()">Save Changes</button>
+  </div>
+</div>
+</div>
+
+<style>.feedback{margin-top:10px;font-size:13px;color:var(--ok);font-style:italic;}</style>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════════════════════════
+// ─── Stabilisation pass (Option A · June 2026) ───
+// Removed a duplicate catalogue editor that broke item editing; added
+// availability checks before every deduction; transfers now log both legs;
+// reorder alerts are total-based (less noise); mobile nav drawer; Add Item
+// now lists every category. Search "Option A" for the touched spots.
+const RESTAURANTS = ['Loulou Paris','Loulou Ramatuelle','Loulou Pirate','Loulou Courchevel','Le Flandrin',"Ralph's",'Grand Café'];
+const BASE_LOCS = ['Paris HQ','Paris Stock','16CS London','MBE'];
+const ALL_LOCS = [...BASE_LOCS, ...RESTAURANTS];
+const DEFAULT_SUPPLIERS = ['Huong Vietnam','Maxim Computer','CopyShop','Imprimerie Magenta','Art Concept','Amazon','Loulou Retail'];
+
+// Restaurant items (bags/splits/nametags can be held in restaurants too)
+const REST_EVENT_ITEMS = ['ev-bags','ev-splits','ev-nametags'];
+
+// ── Base Catalogue ──
+const BASE_CATALOGUE = [
+  // Brochures
+  {id:'br-patron',    cat:'Brochures',          name:'Patron Member Brochure',       threshold:20, note:'Rigid cover — insert-based', locs:['Paris HQ','Paris Stock','16CS London']},
+  {id:'br-committee', cat:'Brochures',          name:'Committee Brochure',           threshold:20, note:'Rigid cover — insert-based', locs:['Paris HQ','Paris Stock','16CS London']},
+  {id:'br-annual',    cat:'Brochures',          name:'Annual Member Brochure',       threshold:20, note:'', locs:['Paris HQ','Paris Stock','16CS London']},
+  {id:'br-journalist',cat:'Brochures',          name:'Journalist Brochure',          threshold:20, note:'For press operations', locs:['Paris HQ','Paris Stock','16CS London']},
+  {id:'br-corporate', cat:'Brochures',          name:'Corporate Brochure',           threshold:20, note:'For Directors', locs:['Paris HQ','Paris Stock','16CS London']},
+  {id:'br-covers',    cat:'Brochures',          name:'Rigid Covers (Patron+Committee)',threshold:20,note:'Shared for patron & committee brochures', locs:['Paris HQ','Paris Stock']},
+  // Investor Brochures
+  {id:'br-uday',      cat:'Investor Brochures', name:'Brochure — Uday',              threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
+  {id:'br-aymeric',   cat:'Investor Brochures', name:'Brochure — Aymeric',           threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
+  {id:'br-salima',    cat:'Investor Brochures', name:'Brochure — Salima',            threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
+  {id:'br-hari',      cat:'Investor Brochures', name:'Brochure — Hari',              threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
+  {id:'br-akshat',    cat:'Investor Brochures', name:'Brochure — Akshat',            threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
+  // Welcome Pack Patron
+  {id:'wp-box',       cat:'Welcome Pack — Patron',name:'Box & Fourreau Set',         threshold:10, note:'Sold together', locs:['MBE','Paris HQ']},
+  {id:'wp-rest-br',   cat:'Welcome Pack — Patron',name:'Restaurant Brochure (pack)', threshold:4,  note:'In patron welcome pack', locs:['MBE','Paris HQ']},
+  {id:'wp-office-br', cat:'Welcome Pack — Patron',name:'Private Office Brochure',    threshold:4,  note:'In patron welcome pack', locs:['MBE','Paris HQ']},
+  {id:'wp-res-card',  cat:'Welcome Pack — Patron',name:'Reservation Card',           threshold:4,  note:'', locs:['MBE','Paris HQ']},
+  {id:'wp-letter',    cat:'Welcome Pack — Patron',name:"Astrid's Letter",            threshold:4,  note:'', locs:['MBE','Paris HQ']},
+  // Welcome Pack Annual — in development
+  {id:'wa-box',       cat:'Welcome Pack — Annual',name:'Annual Box / Envelope',      threshold:15, note:'In development', locs:['MBE','Paris HQ'], status:'development'},
+  {id:'wa-brochure',  cat:'Welcome Pack — Annual',name:'Full Annual Brochure',       threshold:4,  note:'In development', locs:['MBE','Paris HQ'], status:'development'},
+  {id:'wa-keyring',   cat:'Welcome Pack — Annual',name:'Key Ring',                   threshold:60, note:'In development', locs:['MBE','Paris HQ'], status:'development'},
+  // Event Materials — also stocked in restaurants
+  {id:'ev-bags',      cat:'Event Materials',     name:'Les Amis Event Bags',          threshold:50, note:'', locs:['Paris HQ','Paris Stock','16CS London',...RESTAURANTS]},
+  {id:'ev-splits',    cat:'Event Materials',     name:'Complimentary Splits',         threshold:20, note:'', locs:['Paris HQ','16CS London',...RESTAURANTS]},
+  {id:'ev-nametags',  cat:'Event Materials',     name:'Name Tags',                    threshold:100,note:'Total all locations', locs:['Paris HQ','16CS London',...RESTAURANTS]},
+  // Retail
+  {id:'rt-pouch',     cat:'Retail',             name:'Terra Cotta Pouch',             threshold:10, note:'Supplier: Loulou Retail', locs:['Paris HQ','Paris Stock']},
+  {id:'rt-umbrella',  cat:'Retail',             name:'Umbrella',                      threshold:5,  note:'', locs:['Paris HQ','16CS London']},
+  // Stationery
+  {id:'st-photopaper',cat:'Stationery',         name:'Photo Paper',                   threshold:5,  note:'Monthly check', locs:['Paris HQ','16CS London']},
+  {id:'st-stationery',cat:'Stationery',         name:'Stationery & Office Supplies',          threshold:20, note:'Monthly check', locs:['Paris HQ','16CS London']},
+  {id:'st-postcards', cat:'Stationery',         name:'Postcards (general)',           threshold:0,  note:'Log usage case by case', locs:['Paris HQ','Paris Stock','16CS London']},
+  {id:'st-envelopes', cat:'Stationery',         name:'Envelopes',                     threshold:0,  note:'Log usage case by case', locs:['Paris HQ','Paris Stock']},
+  {id:'st-birthday',  cat:'Stationery',         name:'Birthday Cards',                threshold:0,  note:'Log usage case by case', locs:['Paris HQ']},
+  {id:'st-stickers',  cat:'Stationery',         name:'Stickers',                      threshold:100,note:'', locs:['Paris HQ','16CS London']},
+  {id:'st-letterhead',cat:'Stationery',         name:'Letterheads',                   threshold:50, note:'', locs:['Paris HQ']},
+  // Branded items that go to restaurants/events
+  {id:'bf-trinket',   cat:'Retail',             name:'Trinket Tray',                  threshold:5,  note:'Committee & Ambassador welcome gift', locs:['Paris HQ','Paris Stock']},
+  // 16CS Crockery
+  {id:'cr-espresso-saucer',  cat:'Crockery — 16CS', name:'Espresso Saucer',  threshold:2,  note:'', locs:['16CS London']},
+  {id:'cr-espresso-cup',     cat:'Crockery — 16CS', name:'Espresso Cup',     threshold:2,  note:'', locs:['16CS London']},
+  {id:'cr-large-cup',        cat:'Crockery — 16CS', name:'Large Cup',        threshold:2,  note:'', locs:['16CS London']},
+  {id:'cr-large-saucer',     cat:'Crockery — 16CS', name:'Large Saucer',     threshold:2,  note:'', locs:['16CS London']},
+  {id:'cr-milk-pot',         cat:'Crockery — 16CS', name:'Milk Pot',         threshold:1,  note:'', locs:['16CS London']},
+  {id:'cr-coffee-spoon',     cat:'Crockery — 16CS', name:'Coffee Spoon',     threshold:4,  note:'', locs:['16CS London']},
+  {id:'cr-rock-glass',       cat:'Crockery — 16CS', name:'Rock Glass',       threshold:8,  note:'', locs:['16CS London']},
+  {id:'cr-candle-holder',    cat:'Crockery — 16CS', name:'Candle Holder',    threshold:2,  note:'', locs:['16CS London']},
+  // Chouquettes — 3 global items, distributed across all restaurant locations + Paris Stock
+  {id:'ch-box',  cat:'Chouquettes', name:'Chouquette Boxes',    threshold:20, note:'Min 20 per restaurant. Total stock split across Paris Stock + restaurants.', locs:['Paris Stock',...RESTAURANTS]},
+  {id:'ch-bag',  cat:'Chouquettes', name:'Chouquette Bags',     threshold:20, note:'Min 20 per restaurant. Total stock split across Paris Stock + restaurants.', locs:['Paris Stock',...RESTAURANTS]},
+  {id:'ch-post', cat:'Chouquettes', name:'Chouquette Postcards',threshold:20, note:'Min 20 per restaurant. Total stock split across Paris Stock + restaurants.', locs:['Paris Stock',...RESTAURANTS]},
+];
+
+const BUDGET_CATS = [
+  {id:'bc-collateral',name:'Marketing Collateral & Print', budget:4569.6},
+  {id:'bc-gifts',     name:'Branded Gifts',                budget:9600},
+  {id:'bc-merch',     name:'Branded Merch',                budget:0},
+];
+const BUDGET_ITEMS = [
+  {id:'bi-br-patron-c',   catId:'bc-collateral',name:'Patron & Committee inserts',   budget:240},
+  {id:'bi-br-other',      catId:'bc-collateral',name:'Other brochures (own cover)',   budget:390},
+  {id:'bi-br-ladbroke',   catId:'bc-collateral',name:'Ladbroke Hall menus',          budget:40},
+  {id:'bi-br-patron-r',   catId:'bc-collateral',name:'Patron brochure remaining',    budget:1200},
+  {id:'bi-br-annual-r',   catId:'bc-collateral',name:'Annual brochure remaining',    budget:390},
+  {id:'bi-br-journalist-r',catId:'bc-collateral',name:'Journalist brochure remaining',budget:780},
+  {id:'bi-br-corporate-r',catId:'bc-collateral',name:'Corporate brochure remaining', budget:360},
+  {id:'bi-covers-r',      catId:'bc-collateral',name:'Brochure covers remaining',    budget:2600},
+  {id:'bi-bizcard',       catId:'bc-collateral',name:'Business cards',               budget:250},
+  {id:'bi-committee-gift',catId:'bc-gifts',     name:'Committee welcome gift',       budget:700},
+  {id:'bi-patron-gifts',  catId:'bc-gifts',     name:'Patron gifts for dinners',     budget:3600},
+  {id:'bi-other-gifts',   catId:'bc-gifts',     name:'Other gifts for dinners',      budget:1500},
+  {id:'bi-xmas-gifts',    catId:'bc-gifts',     name:'Christmas gifts for partners', budget:0},
+];
+
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
+function getAllItems() {
+  const overrides = state.catalogueOverrides||{};
+  return [...BASE_CATALOGUE.map(item => overrides[item.id] ? {...item,...overrides[item.id]} : item), ...(state.customItems||[])];
+}
+function itemById(id) { return getAllItems().find(i=>i.id===id); }
+function itemName(id) { const i=itemById(id); return i?i.name:id; }
+function totalStock(id) { return Object.values(state.stock[id]||{}).reduce((s,v)=>s+(v||0),0); }
+function stockAt(id,loc) { return (state.stock[id]||{})[loc]||0; }
+function pendingStock(id) { return (state.orders||[]).filter(o=>o.itemId===id&&o.status!=='Delivered').reduce((s,o)=>s+(o.qty||0),0); }
+function slug(r) { return r.replace(/[^a-z]/gi,'').toLowerCase(); }
+
+function buildDefaultStock() {
+  const stock = {};
+  BASE_CATALOGUE.forEach(item => {
+    stock[item.id] = {};
+    item.locs.forEach(loc => { stock[item.id][loc] = 0; });
+  });
+  return stock;
+}
+
+function defaultState() {
+  return {
+    stock: buildDefaultStock(),
+    history: [],
+    orders: [],
+    transfers: [],
+    todoItems: [],
+    doneTodos: {},
+    customItems: [],
+    suppliers: [...DEFAULT_SUPPLIERS],
+    budgetActuals: {},
+    monthlyReminders: {}
+  };
+}
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('loulou_retail_v2');
+    if (s) {
+      const parsed = JSON.parse(s);
+      // Ensure new fields exist
+      if (!parsed.todoItems) parsed.todoItems = [];
+      if (!parsed.doneTodos) parsed.doneTodos = {};
+      if (!parsed.customItems) parsed.customItems = [];
+      if (!parsed.suppliers) parsed.suppliers = [...DEFAULT_SUPPLIERS];
+      if (!parsed.budgetActuals) parsed.budgetActuals = {};
+      // Ensure all items in catalogue have stock keys
+      BASE_CATALOGUE.forEach(item => {
+        if (!parsed.stock[item.id]) parsed.stock[item.id] = {};
+        item.locs.forEach(loc => { if (parsed.stock[item.id][loc]===undefined) parsed.stock[item.id][loc]=0; });
+      });
+      return parsed;
+    }
+  } catch(e) {}
+  return defaultState();
+}
+function saveState() { try { localStorage.setItem('loulou_retail_v2', JSON.stringify(state)); } catch(e) {} }
+function uid() { return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function today() { return new Date().toISOString().slice(0,10); }
+function fmtDate(s) { if (!s) return '—'; try { return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}); } catch(e){return s;} }
+
+function deductStock(id, loc, qty, logEntry) {
+  if (!state.stock[id]) state.stock[id]={};
+  state.stock[id][loc] = Math.max(0,(state.stock[id][loc]||0)-qty);
+  if (logEntry) state.history.unshift({...logEntry,id:uid(),itemId:id,loc,delta:-qty,ts:Date.now()});
+}
+function addStock(id, loc, qty, logEntry) {
+  if (!state.stock[id]) state.stock[id]={};
+  state.stock[id][loc] = (state.stock[id][loc]||0)+qty;
+  if (logEntry) state.history.unshift({...logEntry,id:uid(),itemId:id,loc,delta:+qty,ts:Date.now()});
+}
+// Option A — availability guard. Aggregates a planned set of deductions
+// [{id,loc,qty}] and, if any would push a location below zero, asks the user
+// before recording (so on-hand totals and the history log stay consistent).
+function planShortfalls(plan) {
+  const agg={};
+  plan.forEach(p=>{ if(!p.id||!p.qty) return; const k=p.id+'@@'+p.loc; agg[k]=(agg[k]||0)+p.qty; });
+  const short=[];
+  Object.keys(agg).forEach(k=>{ const i=k.indexOf('@@'); const id=k.slice(0,i), loc=k.slice(i+2); const have=stockAt(id,loc); if(agg[k]>have) short.push(`\u2022 ${itemName(id)} at ${loc}: need ${agg[k]}, only ${have} in stock`); });
+  return short;
+}
+function confirmDeductions(plan) {
+  const short=planShortfalls(plan);
+  if(!short.length) return true;
+  return confirm('Not enough stock for:\n\n'+short.join('\n')+'\n\nStock will be floored at 0 and totals may stop matching the log. Record anyway?');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SEED INITIAL STOCK AS ORDERS
+// ══════════════════════════════════════════════════════════════════
+function seedInitialStock() {
+  // Only seed if history is empty (first load)
+  if (state.history && state.history.length > 0) return;
+
+  const seeds = [
+    // Brochures
+    {itemId:'br-patron',    loc:'Paris HQ',     qty:50,  date:'2026-05-12', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-journalist',loc:'16CS London',  qty:32,  date:'2026-04-27', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-journalist',loc:'Paris HQ',     qty:68,  date:'2026-04-27', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-annual',    loc:'16CS London',  qty:25,  date:'2026-04-27', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-annual',    loc:'Paris HQ',     qty:25,  date:'2026-04-27', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-committee', loc:'Paris HQ',     qty:3,   date:'2026-04-27', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-corporate', loc:'Paris HQ',     qty:3,   date:'2026-04-27', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'br-covers',    loc:'Paris HQ',     qty:50,  date:'2026-04-27', supplier:'Huong Vietnam',       note:'Initial stock — 50 more on order'},
+    // Welcome pack patron (MBE)
+    {itemId:'wp-box',       loc:'MBE',          qty:24,  date:'2026-04-27', supplier:'',                   note:'Initial stock'},
+    {itemId:'wp-res-card',  loc:'MBE',          qty:10,  date:'2026-04-27', supplier:'',                   note:'Initial stock'},
+    {itemId:'wp-letter',    loc:'MBE',          qty:10,  date:'2026-04-27', supplier:'',                   note:'Initial stock'},
+    {itemId:'wp-office-br', loc:'MBE',          qty:10,  date:'2026-04-27', supplier:'',                   note:'Initial stock'},
+    {itemId:'wp-rest-br',   loc:'MBE',          qty:10,  date:'2026-04-27', supplier:'',                   note:'Initial stock'},
+    // Stationery
+    {itemId:'st-stationery',loc:'16CS London',  qty:95,  date:'2026-05-12', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'st-photopaper',loc:'16CS London',  qty:20,  date:'2026-05-12', supplier:'Amazon',             note:'Initial stock'},
+    {itemId:'st-postcards', loc:'Paris Stock',  qty:1000,date:'2026-05-12', supplier:'Huong Vietnam',       note:'Initial stock — chouquette postcards (general)'},
+    {itemId:'st-birthday',  loc:'Paris HQ',     qty:50,  date:'2026-05-12', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    {itemId:'st-stickers',  loc:'Paris HQ',     qty:900, date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'st-stickers',  loc:'16CS London',  qty:100, date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'st-letterhead',loc:'Paris HQ',     qty:300, date:'2026-05-12', supplier:'Imprimerie Magenta', note:'Initial stock'},
+    // Retail
+    {itemId:'rt-pouch',     loc:'Paris Stock',  qty:4,   date:'2026-05-12', supplier:'Loulou Retail',      note:'Initial stock'},
+    {itemId:'rt-umbrella',  loc:'16CS London',  qty:4,   date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'rt-umbrella',  loc:'Paris HQ',     qty:16,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    // 16CS Crockery
+    {itemId:'cr-espresso-saucer', loc:'16CS London', qty:4,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-espresso-cup',    loc:'16CS London', qty:4,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-large-cup',       loc:'16CS London', qty:4,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-large-saucer',    loc:'16CS London', qty:4,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-milk-pot',        loc:'16CS London', qty:2,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-coffee-spoon',    loc:'16CS London', qty:8,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-rock-glass',      loc:'16CS London', qty:23, date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'cr-candle-holder',   loc:'16CS London', qty:8,  date:'2026-05-12', supplier:'', note:'Initial stock'},
+    {itemId:'bf-trinket',   loc:'Paris HQ',     qty:4,   date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'bf-trinket',   loc:'Paris Stock',  qty:30,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    // Event materials
+    {itemId:'ev-bags',      loc:'Paris Stock',  qty:150, date:'2026-05-12', supplier:'Huong Vietnam',       note:'Initial stock'},
+    {itemId:'ev-bags',      loc:'Loulou Pirate',qty:50,  date:'2026-05-12', supplier:'Huong Vietnam',       note:'Initial stock'},
+    {itemId:'ev-bags',      loc:'Loulou Ramatuelle',qty:50,date:'2026-05-12',supplier:'Huong Vietnam',      note:'Initial stock'},
+    {itemId:'ev-nametags',  loc:'Loulou Pirate',qty:50,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'ev-nametags',  loc:'16CS London',  qty:50,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'ev-nametags',  loc:'Paris HQ',     qty:50,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'ev-splits',    loc:'Loulou Pirate',qty:50,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    {itemId:'ev-splits',    loc:'16CS London',  qty:50,  date:'2026-05-12', supplier:'',                   note:'Initial stock'},
+    // Chouquettes — 1000 total of each type at Paris Stock
+    {itemId:'ch-box',  loc:'Paris Stock', qty:1000, date:'2026-05-12', supplier:'Huong Vietnam', note:'1000 total received — transfer 50 per restaurant when ready'},
+    {itemId:'ch-bag',  loc:'Paris Stock', qty:1000, date:'2026-05-12', supplier:'Huong Vietnam', note:'1000 total received — transfer 50 per restaurant when ready'},
+    {itemId:'ch-post', loc:'Paris Stock', qty:1000, date:'2026-05-12', supplier:'Huong Vietnam', note:'1000 total received — transfer 50 per restaurant when ready'},
+  ];
+
+  seeds.forEach(s => {
+    const base = {type:'order', date:s.date, ref:`Initial stock — ${itemName(s.itemId)}`, details:`Supplier: ${s.supplier||'—'} · ${s.note}`};
+    addStock(s.itemId, s.loc, s.qty, base);
+  });
+
+  // Pending orders
+  state.orders.push(
+    {id:uid(), itemId:'br-covers',  loc:'Paris HQ',   qty:50,  budget:0, price:0, supplier:'Huong Vietnam',  date:'2026-04-27', estDelivery:'', actualDelivery:'', notes:'Second batch of 50 covers', status:'Ordered', deliveredDate:''},
+    {id:uid(), itemId:'st-envelopes',loc:'Paris Stock',qty:1000,budget:0, price:0, supplier:'Huong Vietnam',  date:'2026-05-12', estDelivery:'', actualDelivery:'', notes:'⚠ LITIGE — check with Barnabé (achats) if order was actually placed', status:'Ordered', deliveredDate:''},
+  );
+  // Manual todo for envelope issue
+  state.todoItems.push({id:uid(), text:'⚠ Litige commande enveloppes — vérifier avec Barnabé si la commande a bien été passée chez Huong Vietnam', priority:'high', createdAt:today(), manual:true});
+
+  saveState();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════════
+let currentPage = 'dashboard';
+let currentDashTab = 'overview';
+function toggleSidebar(){ document.body.classList.toggle('nav-open'); }
+
+function nav(page) {
+  currentPage = page;
+  document.body.classList.remove('nav-open');
+  document.querySelectorAll('.sidebar-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${page}`));
+  renderPage(page);
+}
+function renderPage(page) {
+  if (page==='dashboard')        renderDashboard();
+  else if (page==='todo')        renderTodo();
+  else if (page==='loc-hq')      renderLocation('Paris HQ','loc-hq-grid');
+  else if (page==='loc-stock')   renderLocation('Paris Stock','loc-stock-grid');
+  else if (page==='loc-london')  renderLocation('16CS London','loc-london-grid');
+  else if (page==='loc-mbe')     renderLocation('MBE','loc-mbe-grid');
+  else if (page==='loc-restaurants') renderRestaurantLocation();
+  else if (page==='op-event')    initEventForm();
+  else if (page==='op-prospect') initProspectForm();
+  else if (page==='op-manual')   initManualForm();
+  else if (page==='op-restaurant') renderRestaurantUpdate();
+  else if (page==='orders')      renderOrders();
+  else if (page==='transfers')   initTransferForm();
+  else if (page==='history')     renderHistory();
+  else if (page==='budget')      renderBudget();
+  else if (page==='catalogue')   renderCatalogue();
+  else if (page==='settings')    renderSettings();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════════
+function switchDashTab(tab) {
+  currentDashTab = tab;
+  document.querySelectorAll('#dash-tabs .tab').forEach((t,i)=>{
+    t.classList.toggle('active',['overview','hq','stock','london','mbe','restaurants'][i]===tab);
+  });
+  renderDashGrid();
+}
+
+function renderDashboard() {
+  const todos = getPendingTodos();
+  const criticals = todos.filter(t=>t.critical);
+  document.getElementById('dash-alerts').innerHTML = criticals.length > 0
+    ? `<div class="alert alert-danger">🚨 <strong>${criticals.length} item${criticals.length>1?'s':''} out of stock or critically low.</strong> Check <a href="#" onclick="nav('todo');return false;" style="color:var(--danger)">To Do</a> for details.</div>`
+    : todos.length > 0
+    ? `<div class="alert alert-warn">⚠ <strong>${todos.length} pending task${todos.length>1?'s':''}</strong> — <a href="#" onclick="nav('todo');return false;" style="color:#7D6608">view To Do</a></div>`
+    : `<div class="alert alert-ok">✓ All stock levels are healthy.</div>`;
+
+  const openOrders = (state.orders||[]).filter(o=>o.status!=='Delivered').length;
+  document.getElementById('dash-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Items tracked</div><div class="kpi-val">${getAllItems().filter(i=>i.status!=='development').length}</div></div>
+    <div class="kpi"><div class="kpi-label">To Do items</div><div class="kpi-val ${todos.length>0?'danger':''}">${todos.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Open orders</div><div class="kpi-val ${openOrders>0?'warn':''}">${openOrders}</div></div>
+    <div class="kpi"><div class="kpi-label">Total movements</div><div class="kpi-val">${(state.history||[]).length}</div></div>
+  `;
+  updateTodoBadge();
+  renderDashGrid();
+}
+
+function renderDashGrid() {
+  const container = document.getElementById('dash-grid-container');
+  const locMap = {hq:'Paris HQ', stock:'Paris Stock', london:'16CS London', mbe:'MBE'};
+
+  if (currentDashTab === 'overview') {
+    const items = getAllItems();
+    const cats = [...new Set(items.map(i=>i.cat))];
+    let html = '';
+    cats.forEach(cat => {
+      const catItems = items.filter(i=>i.cat===cat);
+      if (cat === 'Chouquettes') {
+        // Show condensed: 1 card per restaurant
+        html += `<div style="grid-column:1/-1" class="cat-header">${cat}</div>`;
+        RESTAURANTS.forEach(r => {
+          const box  = stockAt('ch-box', r);
+          const bag  = stockAt('ch-bag', r);
+          const post = stockAt('ch-post', r);
+          const thr  = (getAllItems().find(i=>i.id==='ch-box')?.threshold)||20;
+          const minQ = Math.min(box,bag,post);
+          const isLow = minQ < thr;
+          html += `<div class="stock-card ${isLow?'low':''}">
+            ${isLow?'<span class="sc-badge badge-low">LOW</span>':''}
+            <div class="sc-name">${r}</div>
+            <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Box: <strong>${box}</strong> · Bag: <strong>${bag}</strong> · Post: <strong>${post}</strong></div>
+            <div class="sc-threshold">Min ${thr} per restaurant</div>
+          </div>`;
+        });
+      } else {
+        html += `<div style="grid-column:1/-1" class="cat-header">${cat}</div>`;
+        catItems.forEach(item => { html += stockCardHtml(item); });
+      }
+    });
+    container.innerHTML = `<div class="stock-grid">${html}</div>`;
+  } else if (currentDashTab === 'restaurants') {
+    const choqThr = (getAllItems().find(i=>i.id==='ch-box')?.threshold)||20;
+    let html = '';
+    // Summary: Paris Stock holding
+    const psBox=stockAt('ch-box','Paris Stock'),psBag=stockAt('ch-bag','Paris Stock'),psPost=stockAt('ch-post','Paris Stock');
+    if(psBox+psBag+psPost>0){
+      html+=`<div style="margin-bottom:1rem;"><div class="cat-header">Paris Stock — Pending Dispatch to Restaurants</div><div class="stock-grid">
+        <div class="stock-card" style="border-color:var(--blue);background:var(--blue-light);">
+          <div class="sc-name" style="color:var(--blue);">Chouquette Boxes</div><div class="sc-qty">${psBox}</div>
+        </div>
+        <div class="stock-card" style="border-color:var(--blue);background:var(--blue-light);">
+          <div class="sc-name" style="color:var(--blue);">Chouquette Bags</div><div class="sc-qty">${psBag}</div>
+        </div>
+        <div class="stock-card" style="border-color:var(--blue);background:var(--blue-light);">
+          <div class="sc-name" style="color:var(--blue);">Chouquette Postcards</div><div class="sc-qty">${psPost}</div>
+        </div>
+      </div></div>`;
+    }
+    RESTAURANTS.forEach(r => {
+      const box=stockAt('ch-box',r), bag=stockAt('ch-bag',r), post=stockAt('ch-post',r);
+      const isLow=Math.min(box,bag,post)<choqThr;
+      html += `<div style="margin-bottom:1.25rem;">
+        <div class="cat-header">${r}</div>
+        <div class="stock-grid">
+        <div class="stock-card ${isLow?'low':''}">
+          ${isLow?'<span class="sc-badge badge-low">LOW</span>':''}
+          <div class="sc-name">Chouquette Set</div>
+          <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Box: <strong>${box}</strong> · Bag: <strong>${bag}</strong> · Post: <strong>${post}</strong></div>
+          <div class="sc-threshold">Min ${choqThr} per restaurant</div>
+        </div>`;
+      REST_EVENT_ITEMS.forEach(id => {
+        const item = itemById(id);
+        const qty = stockAt(id, r);
+        if (qty > 0) html += stockCardHtml(item, r);
+      });
+      html += `</div></div>`;
+    });
+    container.innerHTML = html;
+  } else {
+    const loc = locMap[currentDashTab];
+    // Location-specific filters
+    const locFilters = {
+      'Paris HQ': ['Brochures','Investor Brochures','Event Materials','Retail','Stationery'],
+      'Paris Stock': ['Event Materials','Retail','Chouquettes'],
+      '16CS London': ['Brochures','Event Materials','Retail','Stationery','Welcome Pack — Patron','Crockery — 16CS'],
+      'MBE': ['Welcome Pack — Patron','Welcome Pack — Annual'],
+    };
+    const allowedCats = locFilters[loc] || null; // null = show all
+    const items = getAllItems().filter(i=>i.locs&&i.locs.includes(loc));
+    const cats = [...new Set(items.map(i=>i.cat))].filter(cat=> !allowedCats || allowedCats.includes(cat));
+    let html = '';
+    cats.forEach(cat => {
+      if (cat==='Chouquettes' && loc==='Paris Stock') {
+        // Show Paris Stock chouquettes condensed
+        html += `<div style="grid-column:1/-1" class="cat-header">Chouquettes (Paris Stock — pending dispatch)</div>`;
+        ['ch-box','ch-bag','ch-post'].forEach(id=>{
+          const item=itemById(id); if(!item) return;
+          const qty=stockAt(id,'Paris Stock');
+          html+=`<div class="stock-card"><div class="sc-name">${item.name}</div><div class="sc-qty">${qty}</div><div class="sc-threshold">Total at Paris Stock</div></div>`;
+        });
+      } else if (cat!=='Chouquettes') {
+        html += `<div style="grid-column:1/-1" class="cat-header">${cat}</div>`;
+        items.filter(i=>i.cat===cat).forEach(item => { html += stockCardHtml(item, loc); });
+      }
+    });
+    container.innerHTML = `<div class="stock-grid">${html}</div>`;
+  }
+}
+
+function stockCardHtml(item, specificLoc=null) {
+  const qty = specificLoc ? stockAt(item.id, specificLoc) : totalStock(item.id);
+  const pending = pendingStock(item.id);
+  const isDev = item.status==='development';
+  const isLow = !isDev && item.threshold>0 && qty<=item.threshold;
+  const isWarn = !isDev && item.threshold>0 && qty<=item.threshold*1.5 && qty>item.threshold;
+  const cls = isDev?'dev':isLow?'low':isWarn?'warn':'';
+  const pct = item.threshold>0 ? Math.min(100,(qty/Math.max(item.threshold*3,qty||1))*100) : 100;
+  const barCol = isLow?'var(--danger)':isWarn?'var(--warn)':'var(--ok)';
+  return `<div class="stock-card ${cls}">
+    ${isDev?'<span class="sc-badge badge-dev">DEV</span>':''}
+    ${!isDev&&isLow&&qty===0?'<span class="sc-badge badge-low">OUT</span>':''}
+    ${!isDev&&isLow&&qty>0?'<span class="sc-badge badge-low">LOW</span>':''}
+    ${!isDev&&isWarn?'<span class="sc-badge badge-warn">LOW</span>':''}
+    ${pending>0?`<span class="sc-badge badge-order" style="top:28px">+${pending} ord.</span>`:''}
+    <div class="sc-name">${item.name}</div>
+    <div class="sc-qty ${isDev?'':''+cls}">${isDev?'—':qty}</div>
+    ${pending>0?`<div class="sc-pending">+${pending} on order</div>`:''}
+    ${item.threshold>0&&!isDev?`<div class="sc-threshold">Reorder at ${item.threshold}</div><div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${barCol};"></div></div>`:''}
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TO DO
+// ══════════════════════════════════════════════════════════════════
+function getPendingTodos() {
+  const todos = [];
+  getAllItems().forEach(item => {
+    if (!item.threshold || item.threshold <= 0 || item.status==='development') return;
+    if (item.id === 'ev-nametags') {
+      const tot = totalStock(item.id);
+      if (tot < item.threshold) todos.push({id:`auto-${item.id}`, text:`Reorder: ${item.name} — only ${tot} left (threshold: ${item.threshold})`, critical:tot===0, isAuto:true, itemId:item.id});
+    } else if (['ch-box','ch-bag','ch-post'].includes(item.id)) {
+      // Check chouquettes per restaurant
+      RESTAURANTS.forEach(r => {
+        const qty = stockAt(item.id, r);
+        if (qty < item.threshold) {
+          const key = `auto-${item.id}-${r}`;
+          if (!state.doneTodos[key]) {
+            todos.push({id:key, text:`Restock: ${item.name} at ${r} — only ${qty} (min ${item.threshold})`, critical:qty===0, isAuto:true, itemId:item.id, loc:r});
+          }
+        }
+      });
+      // Also check Paris Stock total
+      const psQty = stockAt(item.id,'Paris Stock');
+      if (psQty < item.threshold * 3) {
+        const key = `auto-${item.id}-Paris Stock`;
+        if (!state.doneTodos[key]) todos.push({id:key, text:`Low total stock: ${item.name} — only ${psQty} at Paris Stock`, critical:psQty===0, isAuto:true, itemId:item.id, loc:'Paris Stock'});
+      }
+    } else {
+      // Option A — alert on the item's TOTAL across its office locations rather
+      // than flagging every empty shelf, which previously flooded the dashboard.
+      const tot = totalStock(item.id);
+      if (tot < item.threshold) {
+        const key = `auto-${item.id}`;
+        if (!state.doneTodos[key]) {
+          todos.push({id:key, text:`Reorder: ${item.name} — ${tot} in stock (threshold: ${item.threshold})`, critical:tot===0, isAuto:true, itemId:item.id});
+        }
+      }
+    }
+  });
+  // Monthly reminder
+  const now = new Date();
+  const mk = `${now.getFullYear()}-${now.getMonth()}`;
+  if (!state.doneTodos[`remind-${mk}`]) todos.push({id:`remind-${mk}`, text:'Monthly check: verify Photo Paper and Stationery stock levels', isAuto:true, isReminder:true});
+  // Manual todos
+  (state.todoItems||[]).forEach(t => { if (!state.doneTodos[t.id]) todos.push({...t, isManual:true}); });
+  return todos;
+}
+
+function updateTodoBadge() {
+  const n = getPendingTodos().length;
+  const badge = document.getElementById('todo-badge');
+  badge.textContent = n; badge.style.display = n>0?'inline':'none';
+}
+
+function renderTodo() {
+  const todos = getPendingTodos();
+  const el = document.getElementById('todo-content');
+  if (!todos.length) { el.innerHTML='<div class="alert alert-ok">✓ Nothing on your To Do list!</div>'; return; }
+
+  const autos = todos.filter(t=>t.isAuto&&!t.isReminder);
+  const reminders = todos.filter(t=>t.isReminder);
+  const manuals = todos.filter(t=>t.isManual);
+
+  let html='';
+  if (autos.length) {
+    html+='<div class="cat-header">Stock Alerts</div>';
+    autos.sort((a,b)=>b.critical-a.critical).forEach(t=>{
+      html+=`<div class="todo-item ${t.critical?'critical':'warn-item'}" id="todo-${t.id}">
+        <div class="todo-check" onclick="completeTodo('${t.id}')" title="Mark as done"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;${t.critical?'font-weight:600;color:var(--danger)':''}">${t.text}</div>
+          ${t.critical?'<div style="font-size:11px;color:var(--danger);margin-top:2px;">⚠ Out of stock</div>':''}
+        </div>
+      </div>`;
+    });
+  }
+  if (reminders.length) {
+    html+='<div class="cat-header">Monthly Reminders</div>';
+    reminders.forEach(t=>{
+      html+=`<div class="todo-item warn-item" id="todo-${t.id}">
+        <div class="todo-check" onclick="completeTodo('${t.id}')"></div>
+        <div>${t.text}</div>
+      </div>`;
+    });
+  }
+  if (manuals.length) {
+    html+='<div class="cat-header">Your Tasks</div>';
+    manuals.forEach(t=>{
+      const priCol = t.priority==='high'?'var(--danger)':t.priority==='low'?'var(--ok)':'var(--warn)';
+      html+=`<div class="todo-item manual" id="todo-${t.id}">
+        <div class="todo-check" onclick="completeTodo('${t.id}')"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;">${t.text}</div>
+          <div style="font-size:10px;color:${priCol};margin-top:2px;text-transform:uppercase;letter-spacing:.06em;">${t.priority} priority</div>
+        </div>
+        <button class="btn-del" onclick="deleteTodo('${t.id}')">×</button>
+      </div>`;
+    });
+  }
+  el.innerHTML = html;
+}
+
+function completeTodo(id) {
+  state.doneTodos[id] = today();
+  saveState(); renderTodo(); updateTodoBadge();
+}
+function deleteTodo(id) {
+  state.todoItems = (state.todoItems||[]).filter(t=>t.id!==id);
+  saveState(); renderTodo(); updateTodoBadge();
+}
+function addManualTodo() {
+  const text = document.getElementById('todo-text').value.trim();
+  const priority = document.getElementById('todo-priority').value;
+  if (!text) { alert('Please enter a task.'); return; }
+  state.todoItems.push({id:uid(), text, priority, createdAt:today(), manual:true});
+  saveState();
+  document.getElementById('todo-text').value='';
+  renderTodo(); updateTodoBadge();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LOCATION VIEWS
+// ══════════════════════════════════════════════════════════════════
+function renderLocation(loc, gridId) {
+  const grid = document.getElementById(gridId);
+  const items = getAllItems().filter(i=>i.locs&&i.locs.includes(loc)&&i.cat!=='Chouquettes');
+  const cats = [...new Set(items.map(i=>i.cat))];
+  let html='';
+  cats.forEach(cat => {
+    html+=`<div style="grid-column:1/-1" class="cat-header">${cat}</div>`;
+    items.filter(i=>i.cat===cat).forEach(item=>{ html+=stockCardHtml(item,loc); });
+  });
+  grid.innerHTML = html;
+}
+
+function renderRestaurantLocation() {
+  const el = document.getElementById('loc-rest-content');
+  let html='';
+  RESTAURANTS.forEach(r => {
+    const sl=slug(r);
+    html+=`<div style="margin-bottom:1.5rem;"><div class="cat-header">${r}</div><div class="stock-grid">`;
+    // Chouquettes
+    ['ch-box','ch-bag','ch-post'].forEach(id=>{
+      const item=itemById(id);
+      if(item) html+=stockCardHtml(item,r);
+    });
+    // Event items held there
+    REST_EVENT_ITEMS.forEach(id=>{
+      const qty=stockAt(id,r);
+      if(qty>0||itemById(id).locs.includes(r)){
+        html+=stockCardHtml(itemById(id),r);
+      }
+    });
+    html+=`</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// EVENT FORM
+// ══════════════════════════════════════════════════════════════════
+let eventItems=[];
+function initEventForm() {
+  if(!document.getElementById('ev-date').value) document.getElementById('ev-date').value=today();
+  if(!eventItems.length) addEventItem();
+  renderEventItems();
+}
+function addEventItem() { eventItems.push({id:uid(),itemId:'',qty:1,loc:'Paris HQ',note:''}); renderEventItems(); }
+function renderEventItems() {
+  const container=document.getElementById('ev-items-container');
+  const evItems=getAllItems().filter(i=>i.cat==='Brochures'||i.cat==='Investor Brochures'||i.cat==='Event Materials'||i.cat==='Retail');
+  container.innerHTML=eventItems.map((ei,idx)=>{
+    const sel=getAllItems().find(x=>x.id===ei.itemId);
+    const locs=sel?sel.locs.filter(l=>l!=='MBE'):BASE_LOCS.filter(l=>l!=='MBE');
+    return `<div style="background:var(--cream);border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+        <div class="field">${idx===0?'<label>Item</label>':''}
+          <select onchange="eventItems[${idx}].itemId=this.value;renderEventItems()">
+            <option value="">— Select —</option>
+            ${evItems.map(i=>`<option value="${i.id}" ${ei.itemId===i.id?'selected':''}>${i.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">${idx===0?'<label>Qty</label>':''}
+          <input type="number" min="1" value="${ei.qty}" onchange="eventItems[${idx}].qty=+this.value;updateEventItemPreview(${idx})" placeholder="0">
+        </div>
+        <div class="field">${idx===0?'<label>Location</label>':''}
+          <select onchange="eventItems[${idx}].loc=this.value">
+            ${locs.map(l=>`<option value="${l}" ${ei.loc===l?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">${idx===0?'<label>Note</label>':''}
+          <input type="text" value="${ei.note}" onchange="eventItems[${idx}].note=this.value" placeholder="e.g. given to journalist">
+        </div>
+        <button class="btn-del" onclick="removeEventItem(${idx})">×</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--gold-dark);">
+        <input type="checkbox" ${ei.withGift?'checked':''} onchange="eventItems[${idx}].withGift=this.checked;updateEventItemPreview(${idx})" style="width:auto;">
+        <span>Gifted with <strong>1 Les Amis Bag + 1 Comp Split</strong> per unit</span>
+        <span id="ev-gift-preview-${idx}" style="color:var(--ink-faint);margin-left:4px;"></span>
+      </label>
+    </div>`;
+  }).join('');
+}
+function removeEventItem(idx) { eventItems.splice(idx,1); renderEventItems(); }
+function updateEventItemPreview(idx) {
+  const ei = eventItems[idx];
+  const el = document.getElementById(`ev-gift-preview-${idx}`);
+  if (!el) return;
+  el.textContent = (ei.withGift && ei.qty > 0) ? `→ −${ei.qty} bags, −${ei.qty} splits` : '';
+}
+
+function submitEvent() {
+  const name=document.getElementById('ev-name').value.trim();
+  const date=document.getElementById('ev-date').value;
+  const type=document.getElementById('ev-type').value;
+  if(!name||!date){alert('Please fill in event name and date.');return;}
+  const base={type:'event',date,ref:`${type||'Event'}: ${name}`};
+  const bags=+document.getElementById('ev-bags').value||0;
+  const splits=+document.getElementById('ev-splits').value||0;
+  const nametags=+document.getElementById('ev-nametags').value||0;
+  const packLoc=eventItems[0]?.loc||'Paris HQ';
+  // Option A — build the whole deduction plan first, then check availability.
+  const plan=[];
+  eventItems.forEach(ei=>{
+    if(!ei.itemId||!ei.qty) return;
+    plan.push({id:ei.itemId,loc:ei.loc||'Paris HQ',qty:ei.qty,note:ei.note});
+    if(ei.withGift){
+      const gLoc=itemById('ev-bags')?.locs.includes(ei.loc)?ei.loc:'Paris HQ';
+      plan.push({id:'ev-bags',loc:gLoc,qty:ei.qty,note:'With item gift'});
+      plan.push({id:'ev-splits',loc:gLoc,qty:ei.qty,note:'With item gift'});
+    }
+  });
+  if(bags)plan.push({id:'ev-bags',loc:packLoc,qty:bags});
+  if(splits)plan.push({id:'ev-splits',loc:packLoc,qty:splits});
+  if(nametags)plan.push({id:'ev-nametags',loc:packLoc,qty:nametags});
+  if(!plan.length){alert('Please add at least one item.');return;}
+  if(!confirmDeductions(plan)) return;
+  plan.forEach(p=>deductStock(p.id,p.loc,p.qty,{...base,note:p.note}));
+  saveState(); updateTodoBadge();
+  showFeedback('ev-feedback',`✓ Event "${name}" saved.`);
+  clearEventForm();
+}
+function clearEventForm() {
+  ['ev-name','ev-bags','ev-splits','ev-nametags','ev-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ev-date').value=today();
+  eventItems=[]; addEventItem();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WELCOME PACK
+// ══════════════════════════════════════════════════════════════════
+function switchWelcomeTab(tab) {
+  document.getElementById('wp-patron').style.display=tab==='patron'?'':'none';
+  document.getElementById('wp-annual').style.display=tab==='annual'?'':'none';
+  document.querySelectorAll('#page-op-welcome .tab').forEach((t,i)=>t.classList.toggle('active',(tab==='patron'&&i===0)||(tab==='annual'&&i===1)));
+  if(!document.getElementById('wp-p-date').value){document.getElementById('wp-p-date').value=today();}
+}
+function submitWelcomePack(type) {
+  if(type==='annual'){alert('Annual welcome pack is currently In Development. Stock tracking will be activated once ready.');return;}
+  const name=document.getElementById('wp-p-name').value.trim();
+  const date=document.getElementById('wp-p-date').value;
+  const qty=+document.getElementById('wp-p-qty').value||1;
+  const loc=document.getElementById('wp-p-loc').value;
+  if(!name||!date){alert('Please fill in member name and date.');return;}
+  const base={type:'welcome_pack',date,ref:`Patron Welcome Pack — ${name}`,details:`${qty} pack(s) from ${loc}`};
+  const comps=['wp-box','wp-rest-br','wp-office-br','wp-res-card','wp-letter'];
+  if(!confirmDeductions(comps.map(id=>({id,loc,qty})))) return;
+  comps.forEach(id=>deductStock(id,loc,qty,base));
+  saveState(); updateTodoBadge();
+  showFeedback('wp-p-feedback',`✓ ${qty} Patron Pack(s) sent to ${name}.`);
+  document.getElementById('wp-p-name').value='';
+  document.getElementById('wp-p-qty').value='1';
+  document.getElementById('wp-p-notes').value='';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PROSPECT MEETING
+// ══════════════════════════════════════════════════════════════════
+let prospectItems=[];
+function initProspectForm() {
+  if(!document.getElementById('pr-date').value) document.getElementById('pr-date').value=today();
+  if(!prospectItems.length) addProspectItem();
+  renderProspectItems();
+}
+function addProspectItem() { prospectItems.push({id:uid(),itemId:'',qty:1,loc:'Paris HQ'}); renderProspectItems(); }
+function renderProspectItems() {
+  const container=document.getElementById('pr-items-container');
+  const items=getAllItems().filter(i=>i.cat==='Brochures'||i.cat==='Investor Brochures'||i.cat==='Stationery');
+  container.innerHTML=prospectItems.map((pi,idx)=>{
+    const sel=getAllItems().find(x=>x.id===pi.itemId);
+    const locs=sel?sel.locs.filter(l=>l!=='MBE'&&!RESTAURANTS.includes(l)):['Paris HQ','Paris Stock','16CS London'];
+    return `<div style="background:var(--cream);border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+        <div class="field">${idx===0?'<label>Item</label>':''}
+          <select onchange="prospectItems[${idx}].itemId=this.value;renderProspectItems()">
+            <option value="">— Select —</option>
+            ${items.map(i=>`<option value="${i.id}" ${pi.itemId===i.id?'selected':''}>${i.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">${idx===0?'<label>Qty</label>':''}
+          <input type="number" min="1" value="${pi.qty}" onchange="prospectItems[${idx}].qty=+this.value" placeholder="0">
+        </div>
+        <div class="field">${idx===0?'<label>Location</label>':''}
+          <select onchange="prospectItems[${idx}].loc=this.value">
+            ${locs.map(l=>`<option value="${l}" ${pi.loc===l?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <button class="btn-del" onclick="removeProspectItem(${idx})">×</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--gold-dark);">
+        <input type="checkbox" ${pi.withGift?'checked':''} onchange="prospectItems[${idx}].withGift=this.checked" style="width:auto;">
+        <span>Gifted with <strong>1 Les Amis Bag + 1 Comp Split</strong> per unit</span>
+      </label>
+    </div>`;
+  }).join('');
+}
+function removeProspectItem(idx) { prospectItems.splice(idx,1); renderProspectItems(); }
+function submitProspect() {
+  const name=document.getElementById('pr-name').value.trim();
+  const date=document.getElementById('pr-date').value;
+  const type=document.getElementById('pr-type').value;
+  if(!name||!date){alert('Please fill in prospect name and date.');return;}
+  const base={type:'prospect',date,ref:`${type} — ${name}`};
+  const plan=[];
+  prospectItems.forEach(pi=>{
+    if(!pi.itemId||!pi.qty) return;
+    plan.push({id:pi.itemId,loc:pi.loc||'Paris HQ',qty:pi.qty});
+    if(pi.withGift){
+      const gLoc=itemById('ev-bags')?.locs.includes(pi.loc)?pi.loc:'Paris HQ';
+      plan.push({id:'ev-bags',loc:gLoc,qty:pi.qty,note:'With item gift'});
+      plan.push({id:'ev-splits',loc:gLoc,qty:pi.qty,note:'With item gift'});
+    }
+  });
+  if(!plan.length){alert('Please add at least one item.');return;}
+  if(!confirmDeductions(plan)) return;
+  plan.forEach(p=>deductStock(p.id,p.loc,p.qty,{...base,note:p.note}));
+  saveState(); updateTodoBadge();
+  showFeedback('pr-feedback',`✓ Meeting with ${name} saved.`);
+  clearProspectForm();
+}
+function clearProspectForm() {
+  document.getElementById('pr-name').value='';
+  document.getElementById('pr-date').value=today();
+  document.getElementById('pr-notes').value='';
+  prospectItems=[]; addProspectItem();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RESTAURANT UPDATE
+// ══════════════════════════════════════════════════════════════════
+function renderRestaurantUpdate() {
+  if(!document.getElementById('rest-period').value) document.getElementById('rest-period').value=new Date().toISOString().slice(0,7);
+  renderRestaurantStockGrid();
+}
+function previewRestaurantDeduction() {
+  const rest=document.getElementById('rest-name').value;
+  const members=+document.getElementById('rest-members').value||0;
+  const el=document.getElementById('rest-preview');
+  if(!members){el.style.display='none';return;}
+  const sl=slug(rest);
+  const b=stockAt('ch-box',rest),ba=stockAt('ch-bag',rest),p=stockAt('ch-post',rest);
+  el.style.display='';
+  el.innerHTML=`<div class="alert alert-info">🍽 Will deduct <strong>${members}</strong> of each from <strong>${rest}</strong>:
+    Box ${b}→${Math.max(0,b-members)} · Bag ${ba}→${Math.max(0,ba-members)} · Postcard ${p}→${Math.max(0,p-members)}</div>`;
+}
+function submitRestaurantUpdate() {
+  const rest=document.getElementById('rest-name').value;
+  const period=document.getElementById('rest-period').value;
+  const members=+document.getElementById('rest-members').value||0;
+  const notes=document.getElementById('rest-notes').value;
+  if(!rest||!period||!members){alert('Please fill in restaurant, period and member count.');return;}
+  const base={type:'restaurant',date:period+'-01',ref:`${rest} — ${period} (${members} members)`,details:notes||'—'};
+  const plan=['ch-box','ch-bag','ch-post'].map(id=>({id,loc:rest,qty:members}));
+  if(!confirmDeductions(plan)) return;
+  plan.forEach(p=>deductStock(p.id,p.loc,p.qty,base));
+  saveState(); updateTodoBadge();
+  showFeedback('rest-feedback',`✓ ${rest}: deducted ${members} of each chouquette item for ${period}.`);
+  document.getElementById('rest-members').value='';
+  document.getElementById('rest-notes').value='';
+  document.getElementById('rest-preview').style.display='none';
+  renderRestaurantStockGrid();
+}
+function renderRestaurantStockGrid() {
+  // Chouquettes per restaurant
+  const grid=document.getElementById('rest-stock-grid');
+  let html='';
+  RESTAURANTS.forEach(r=>{
+    const b=stockAt('ch-box',r),ba=stockAt('ch-bag',r),p=stockAt('ch-post',r);
+    const thr = (getAllItems().find(i=>i.id==='ch-box')?.threshold)||20;
+    const low=Math.min(b,ba,p)<thr;
+    html+=`<div class="stock-card ${low?'low':''}">
+      ${low?'<span class="sc-badge badge-low">LOW</span>':''}
+      <div class="sc-name">${r}</div>
+      <div style="font-size:11px;margin-top:4px;">Box: <strong>${b}</strong> · Bag: <strong>${ba}</strong> · Post: <strong>${p}</strong></div>
+    </div>`;
+  });
+  // Also show Paris Stock holding
+  const psBox=stockAt('ch-box','Paris Stock'),psBag=stockAt('ch-bag','Paris Stock'),psPost=stockAt('ch-post','Paris Stock');
+  if(psBox+psBag+psPost>0){
+    html+=`<div class="stock-card" style="border-color:var(--blue);background:var(--blue-light);">
+      <div class="sc-name" style="color:var(--blue);">Paris Stock (pending dispatch)</div>
+      <div style="font-size:11px;margin-top:4px;">Box: <strong>${psBox}</strong> · Bag: <strong>${psBag}</strong> · Post: <strong>${psPost}</strong></div>
+    </div>`;
+  }
+  grid.innerHTML=html;
+  // Event items
+  const egrid=document.getElementById('rest-event-grid');
+  let ehtml='';
+  RESTAURANTS.forEach(r=>{
+    const bags=stockAt('ev-bags',r),splits=stockAt('ev-splits',r),tags=stockAt('ev-nametags',r);
+    if(bags>0||splits>0||tags>0){
+      ehtml+=`<div class="stock-card">
+        <div class="sc-name">${r}</div>
+        <div style="font-size:11px;margin-top:4px;">Bags: <strong>${bags}</strong> · Splits: <strong>${splits}</strong> · Tags: <strong>${tags}</strong></div>
+      </div>`;
+    }
+  });
+  egrid.innerHTML=ehtml||'<span style="font-size:13px;color:var(--ink-faint);font-style:italic;">No event items in restaurants yet.</span>';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MANUAL ENTRY
+// ══════════════════════════════════════════════════════════════════
+function initManualForm() {
+  if(!document.getElementById('me-date').value) document.getElementById('me-date').value=today();
+  document.getElementById('me-cat').value='';
+  document.getElementById('me-item').innerHTML='<option value="">— Select item —</option>';
+  document.getElementById('me-bag-split-section').style.display='none';
+}
+function updateManualItems() {
+  const cat=document.getElementById('me-cat').value;
+  const items=getAllItems().filter(i=>!cat||i.cat===cat);
+  document.getElementById('me-item').innerHTML='<option value="">— Select item —</option>'+items.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+  updateManualLocations();
+  document.getElementById('me-bag-split-section').style.display=(cat==='Retail')?'':'none';
+  updateBagSplitPreview();
+}
+function updateManualLocations() {
+  const itemId=document.getElementById('me-item').value;
+  const item=itemById(itemId);
+  const locs=item?item.locs:ALL_LOCS;
+  document.getElementById('me-loc').innerHTML=locs.map(l=>`<option>${l}</option>`).join('');
+  updateBagSplitPreview();
+}
+function updateBagSplitPreview() {
+  const qty=Math.abs(+document.getElementById('me-qty').value)||0;
+  const checked=document.getElementById('me-bag-split')?.checked;
+  const prev=document.getElementById('me-bag-split-preview');
+  if(prev) prev.textContent=(qty>0&&checked)?`→ Will also deduct ${qty} Les Amis Bag(s) and ${qty} Comp Split(s)`:'';
+}
+function submitManual() {
+  const itemId=document.getElementById('me-item').value;
+  const loc=document.getElementById('me-loc').value;
+  const qty=+document.getElementById('me-qty').value;
+  const reason=document.getElementById('me-reason').value.trim();
+  const date=document.getElementById('me-date').value;
+  if(!itemId||!qty||!date){alert('Please fill in item, date and quantity.');return;}
+  const base={type:'manual',date,ref:`Manual — ${itemName(itemId)}`,details:reason||'—'};
+  const bs=document.getElementById('me-bag-split');
+  const bagSplit=bs&&bs.checked&&qty<0;
+  const bagLoc=itemById('ev-bags')?.locs.includes(loc)?loc:'Paris HQ';
+  if(qty<0){
+    const absQ=Math.abs(qty);
+    const plan=[{id:itemId,loc,qty:absQ}];
+    if(bagSplit){ plan.push({id:'ev-bags',loc:bagLoc,qty:absQ}); plan.push({id:'ev-splits',loc:bagLoc,qty:absQ}); }
+    if(!confirmDeductions(plan)) return;
+    deductStock(itemId,loc,absQ,base);
+    if(bagSplit){
+      deductStock('ev-bags',bagLoc,absQ,{...base,ref:`${base.ref} (bag)`});
+      deductStock('ev-splits',bagLoc,absQ,{...base,ref:`${base.ref} (split)`});
+    }
+  } else {
+    addStock(itemId,loc,qty,base);
+  }
+  saveState(); updateTodoBadge();
+  showFeedback('me-feedback',`✓ Saved: ${qty>0?'+':''}${qty} × ${itemName(itemId)} at ${loc}.`);
+  ['me-qty','me-reason'].forEach(id=>document.getElementById(id).value='');
+  if(bs) bs.checked=false; updateBagSplitPreview();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ORDERS
+// ══════════════════════════════════════════════════════════════════
+function supplierOptions() {
+  if(!state.suppliers) state.suppliers=[...DEFAULT_SUPPLIERS];
+  return state.suppliers.map(s=>`<option>${s}</option>`).join('')+'<option value="__other__">Other (type below)</option>';
+}
+function openOrderModal() {
+  document.getElementById('ord-item').innerHTML=getAllItems().map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+  document.getElementById('ord-supplier').innerHTML=supplierOptions();
+  document.getElementById('ord-date').value=today();
+  document.getElementById('order-modal').style.display='flex';
+}
+function closeOrderModal(){document.getElementById('order-modal').style.display='none';}
+function submitOrder() {
+  const itemId=document.getElementById('ord-item').value;
+  const loc=document.getElementById('ord-loc').value;
+  const qty=+document.getElementById('ord-qty').value;
+  const budget=+document.getElementById('ord-budget').value;
+  const price=+document.getElementById('ord-price').value;
+  let supplier=document.getElementById('ord-supplier').value;
+  if(supplier==='__other__') supplier=prompt('Supplier name:','')||'';
+  const date=document.getElementById('ord-date').value;
+  const estDel=document.getElementById('ord-est-delivery').value;
+  const actDel=document.getElementById('ord-actual-delivery').value;
+  const notes=document.getElementById('ord-notes').value.trim();
+  if(!itemId||!qty||!date){alert('Please fill in item, quantity and date.');return;}
+  const delivered=!!actDel;
+  const ord={id:uid(),itemId,loc,qty,budget,price,supplier,date,estDelivery:estDel,actualDelivery:actDel,notes,status:delivered?'Delivered':'Ordered',deliveredDate:actDel||''};
+  state.orders.unshift(ord);
+  if(delivered) addStock(itemId,loc,qty,{type:'order',date:actDel||date,ref:`Order received — ${itemName(itemId)}`,details:`${qty} from ${supplier||'supplier'} → ${loc}`});
+  saveState(); renderOrders(); updateTodoBadge();
+  closeOrderModal();
+}
+function markDelivered(id) {
+  const ord=state.orders.find(o=>o.id===id);
+  if(!ord||ord.status==='Delivered') return;
+  const d=prompt('Delivery date (YYYY-MM-DD):',today()); if(!d) return;
+  ord.status='Delivered'; ord.deliveredDate=d;
+  addStock(ord.itemId,ord.loc,ord.qty,{type:'order',date:d,ref:`Order received — ${itemName(ord.itemId)}`,details:`${ord.qty} from ${ord.supplier||'supplier'} → ${ord.loc}`});
+  saveState(); renderOrders(); updateTodoBadge();
+}
+function renderOrders() {
+  const tbody=document.getElementById('orders-body');
+  const pending=(state.orders||[]).filter(o=>o.status!=='Delivered');
+  if(!pending.length){tbody.innerHTML='<tr class="empty-row"><td colspan="10">No open orders. Delivered orders appear in History.</td></tr>';return;}
+  tbody.innerHTML=pending.map(o=>`<tr>
+    <td>${fmtDate(o.date)}</td>
+    <td><strong>${itemName(o.itemId)}</strong><br><span style="font-size:11px;color:var(--ink-faint)">${o.loc}</span></td>
+    <td class="td-num">${o.qty}</td>
+    <td>${o.supplier||'—'}</td>
+    <td class="td-num">${o.budget?'€'+o.budget.toLocaleString('fr-FR'):'—'}</td>
+    <td class="td-num">${o.price?'€'+o.price.toLocaleString('fr-FR'):'—'}</td>
+    <td>${fmtDate(o.estDelivery)}</td>
+    <td style="font-size:11px;color:var(--ink-faint);max-width:150px;">${o.notes||'—'}</td>
+    <td><span class="status-pill sp-pending">${o.status}</span></td>
+    <td><button class="btn btn-ghost" style="padding:3px 9px;font-size:11px;" onclick="markDelivered('${o.id}')">Mark Delivered</button></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TRANSFERS
+// ══════════════════════════════════════════════════════════════════
+function initTransferForm() {
+  if(!document.getElementById('tr-date').value) document.getElementById('tr-date').value=today();
+  const sel=document.getElementById('tr-item');
+  sel.innerHTML=getAllItems().map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+  updateTransferLocs();
+  renderTransfers();
+}
+function updateTransferLocs() {
+  const id=document.getElementById('tr-item').value;
+  const item=itemById(id);
+  const locs=item?item.locs:ALL_LOCS;
+  document.getElementById('tr-from').innerHTML=locs.map(l=>`<option>${l}</option>`).join('');
+  document.getElementById('tr-to').innerHTML=locs.map(l=>`<option>${l}</option>`).join('');
+}
+function submitTransfer() {
+  const itemId=document.getElementById('tr-item').value;
+  const from=document.getElementById('tr-from').value;
+  const to=document.getElementById('tr-to').value;
+  const qty=+document.getElementById('tr-qty').value;
+  const date=document.getElementById('tr-date').value;
+  const by=document.getElementById('tr-by').value.trim();
+  const reason=document.getElementById('tr-reason').value.trim();
+  if(!itemId||!qty||!date||from===to){alert('Please fill all fields and ensure From ≠ To.');return;}
+  const avail=stockAt(itemId,from);
+  if(qty>avail){alert(`Only ${avail} units available at ${from}.`);return;}
+  const meta=`By: ${by||'—'}. Reason: ${reason||'—'}`;
+  deductStock(itemId,from,qty,{type:'transfer',date,ref:`Transfer out — ${itemName(itemId)}`,details:`→ ${to}. ${meta}`});
+  addStock(itemId,to,qty,{type:'transfer',date,ref:`Transfer in — ${itemName(itemId)}`,details:`← ${from}. ${meta}`});
+  state.transfers.unshift({id:uid(),itemId,from,to,qty,date,by,reason});
+  saveState(); updateTodoBadge();
+  showFeedback('tr-feedback',`✓ Transferred ${qty} × ${itemName(itemId)}: ${from} → ${to}.`);
+  ['tr-qty','tr-by','tr-reason'].forEach(id=>document.getElementById(id).value='');
+  renderTransfers();
+}
+function renderTransfers() {
+  const tbody=document.getElementById('transfers-body');
+  if(!state.transfers||!state.transfers.length){tbody.innerHTML='<tr class="empty-row"><td colspan="7">No transfers yet.</td></tr>';return;}
+  tbody.innerHTML=state.transfers.map(t=>`<tr>
+    <td>${fmtDate(t.date)}</td><td>${itemName(t.itemId)}</td><td class="td-num">${t.qty}</td>
+    <td>${t.from}</td><td>${t.to}</td><td>${t.by||'—'}</td>
+    <td style="font-size:12px;color:var(--ink-faint)">${t.reason||'—'}</td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════════════════════════
+function openHistoryEdit(id) {
+  const entry = (state.history||[]).find(h=>h.id===id);
+  if (!entry) return;
+  const modal = document.getElementById('history-edit-modal');
+  document.getElementById('he-id').value = id;
+  document.getElementById('he-date').value = entry.date||'';
+  document.getElementById('he-delta').value = entry.delta||0;
+  document.getElementById('he-ref').value = entry.ref||'';
+  document.getElementById('he-details').value = entry.details||'';
+  // Populate location select dynamically
+  const locSel = document.getElementById('he-loc');
+  const item = itemById(entry.itemId);
+  const locs = item ? item.locs : ALL_LOCS;
+  locSel.innerHTML = ALL_LOCS.map(l=>`<option value="${l}" ${l===entry.loc?'selected':''}>${l}</option>`).join('');
+  if (entry.loc && !ALL_LOCS.includes(entry.loc)) {
+    locSel.innerHTML += `<option value="${entry.loc}" selected>${entry.loc}</option>`;
+  }
+  modal.style.display='flex';
+}
+function saveHistoryEdit() {
+  const id = document.getElementById('he-id').value;
+  const entry = (state.history||[]).find(h=>h.id===id);
+  if (!entry) return;
+  const oldDelta = entry.delta;
+  const newDelta = +document.getElementById('he-delta').value;
+  const newLoc = document.getElementById('he-loc').value;
+  const newDate = document.getElementById('he-date').value;
+  // Reverse old stock effect and apply new
+  if (oldDelta !== newDelta || entry.loc !== newLoc) {
+    // Reverse old
+    if (entry.itemId && entry.loc) {
+      if (oldDelta > 0) deductStock(entry.itemId, entry.loc, oldDelta, null);
+      else addStock(entry.itemId, entry.loc, Math.abs(oldDelta), null);
+    }
+    // Apply new
+    if (entry.itemId && newLoc) {
+      if (newDelta > 0) addStock(entry.itemId, newLoc, newDelta, null);
+      else deductStock(entry.itemId, newLoc, Math.abs(newDelta), null);
+    }
+  }
+  entry.delta = newDelta;
+  entry.loc = newLoc;
+  entry.date = newDate;
+  entry.ref = document.getElementById('he-ref').value;
+  entry.details = document.getElementById('he-details').value;
+  saveState(); updateTodoBadge();
+  document.getElementById('history-edit-modal').style.display='none';
+  renderHistory();
+}
+function deleteHistoryEntry(id) {
+  if (!confirm('Delete this history entry? This will NOT reverse the stock change automatically.')) return;
+  state.history = (state.history||[]).filter(h=>h.id!==id);
+  saveState(); renderHistory();
+}
+function closeHistoryEdit() { document.getElementById('history-edit-modal').style.display='none'; }
+
+function renderHistory() {
+  const itemFilter=document.getElementById('hist-item-filter').value;
+  const typeFilter=document.getElementById('hist-type-filter').value;
+  const sel=document.getElementById('hist-item-filter');
+  const cur=sel.value||'all';
+  sel.innerHTML='<option value="all">All items</option>'+getAllItems().map(i=>`<option value="${i.id}" ${i.id===cur?'selected':''}>${i.name}</option>`).join('');
+  let logs=[...state.history||[]];
+  if(itemFilter&&itemFilter!=='all') logs=logs.filter(l=>l.itemId===itemFilter);
+  if(typeFilter&&typeFilter!=='all') logs=logs.filter(l=>l.type===typeFilter);
+  document.getElementById('hist-count').textContent=`${logs.length} movement${logs.length!==1?'s':''}`;
+  const typeLabels={event:'Event',welcome_pack:'Welcome Pack',prospect:'Prospect',restaurant:'Restaurant',manual:'Manual',transfer:'Transfer',order:'Order'};
+  const tbody=document.getElementById('history-body');
+  if(!logs.length){tbody.innerHTML='<tr class="empty-row"><td colspan="6">No movements recorded.</td></tr>';return;}
+  tbody.innerHTML=logs.map(l=>`<tr>
+    <td>${fmtDate(l.date)}</td>
+    <td><span class="status-pill sp-pending">${typeLabels[l.type]||l.type}</span></td>
+    <td>${itemName(l.itemId)}</td>
+    <td style="font-size:11px;color:var(--ink-faint)">${l.loc||'—'}</td>
+    <td class="td-num" style="color:${l.delta>0?'var(--ok)':'var(--danger)'}">${l.delta>0?'+':''}${l.delta}</td>
+    <td style="font-size:12px;color:var(--ink-faint)">${l.ref||'—'}${l.details&&l.details!=='—'?`<br><span style="font-size:11px">${l.details}</span>`:''}</td>
+    <td><button class="btn btn-ghost" style="padding:3px 9px;font-size:11px;" onclick="openHistoryEdit('${l.id}')">Edit</button>
+        <button class="btn-del" onclick="deleteHistoryEntry('${l.id}')" title="Delete">×</button></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BUDGET
+// ══════════════════════════════════════════════════════════════════
+function renderBudget() {
+  const el=document.getElementById('budget-content');
+  let html='';
+  html+='<div class="card"><div class="card-title">Budget by Category</div><div class="table-wrap"><table><thead><tr><th>Category</th><th style="text-align:right">Budget (€)</th><th style="text-align:right">Spent (€)</th><th style="text-align:right">Remaining (€)</th><th>Progress</th></tr></thead><tbody>';
+  let tot=0,spent=0;
+  BUDGET_CATS.forEach(cat=>{
+    const cb=BUDGET_ITEMS.filter(i=>i.catId===cat.id).reduce((s,i)=>s+i.budget,0);
+    const cs=BUDGET_ITEMS.filter(i=>i.catId===cat.id).reduce((s,i)=>s+(state.budgetActuals?.[i.id]||0),0);
+    const rem=cb-cs; const pct=cb>0?Math.min(100,cs/cb*100):0;
+    const col=pct>90?'var(--danger)':pct>70?'var(--warn)':'var(--ok)';
+    tot+=cb; spent+=cs;
+    html+=`<tr><td><strong>${cat.name}</strong></td><td class="td-num">€${cb.toLocaleString('fr-FR')}</td><td class="td-num" style="color:${col}">€${cs.toLocaleString('fr-FR')}</td><td class="td-num" style="color:${rem<0?'var(--danger)':'var(--ok)'}">€${rem.toLocaleString('fr-FR')}</td><td style="min-width:120px"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${col}"></div></div><span style="font-size:10px;color:var(--ink-faint)">${pct.toFixed(0)}%</span></td></tr>`;
+  });
+  html+=`<tr style="background:var(--cream)"><td><strong>TOTAL</strong></td><td class="td-num"><strong>€${tot.toLocaleString('fr-FR')}</strong></td><td class="td-num"><strong>€${spent.toLocaleString('fr-FR')}</strong></td><td class="td-num" style="color:${tot-spent<0?'var(--danger)':'var(--ok)'}"><strong>€${(tot-spent).toLocaleString('fr-FR')}</strong></td><td></td></tr>`;
+  html+='</tbody></table></div></div>';
+  html+='<div class="card"><div class="card-title">Budget by Item — enter actuals below</div><div class="table-wrap"><table><thead><tr><th>Item</th><th>Category</th><th style="text-align:right">Budget (€)</th><th style="text-align:right">Actual (€)</th><th style="text-align:right">Left (€)</th><th>Update</th></tr></thead><tbody>';
+  BUDGET_ITEMS.forEach(bi=>{
+    const cat=BUDGET_CATS.find(c=>c.id===bi.catId);
+    const actual=state.budgetActuals?.[bi.id]||0;
+    const left=bi.budget-actual;
+    html+=`<tr><td>${bi.name}</td><td style="font-size:11px;color:var(--ink-faint)">${cat?.name||'—'}</td><td class="td-num">€${bi.budget.toLocaleString('fr-FR')}</td><td class="td-num" style="color:${actual>bi.budget?'var(--danger)':'var(--ink)'}">${actual>0?'€'+actual.toLocaleString('fr-FR'):'—'}</td><td class="td-num" style="color:${left<0?'var(--danger)':'var(--ok)'}">€${left.toLocaleString('fr-FR')}</td><td><div style="display:flex;gap:6px;align-items:center"><input type="number" id="ba-${bi.id}" value="${actual||''}" placeholder="0.00" step="0.01" style="width:90px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--cream);"><button onclick="saveBudgetActual('${bi.id}')" style="padding:4px 10px;font-size:11px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;">Save</button></div></td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+  el.innerHTML=html;
+}
+function saveBudgetActual(biId) {
+  const val=+document.getElementById(`ba-${biId}`).value||0;
+  if(!state.budgetActuals) state.budgetActuals={};
+  state.budgetActuals[biId]=val;
+  saveState(); renderBudget();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CATALOGUE
+// ══════════════════════════════════════════════════════════════════
+function renderCatalogue() {
+  const tbody=document.getElementById('catalogue-body');
+  const search=(document.getElementById('cat-search')?.value||'').toLowerCase();
+  const filterCat=document.getElementById('cat-filter-cat')?.value||'';
+  // Populate category filter
+  const catSel=document.getElementById('cat-filter-cat');
+  if(catSel){
+    const cats=[...new Set(getAllItems().map(i=>i.cat))];
+    const cur=catSel.value;
+    catSel.innerHTML='<option value="">All categories</option>'+cats.map(cat=>`<option value="${cat}" ${cat===cur?'selected':''}>${cat}</option>`).join('');
+  }
+  let items=getAllItems();
+  if(search) items=items.filter(i=>i.name.toLowerCase().includes(search)||i.cat.toLowerCase().includes(search));
+  if(filterCat) items=items.filter(i=>i.cat===filterCat);
+
+  const statusLabel=s=>s==='development'?'In Development':s==='discontinued'?'Discontinued':'Active';
+  const statusColor=s=>s==='development'?'var(--purple)':s==='discontinued'?'var(--ink-faint)':'var(--ok)';
+
+  tbody.innerHTML=items.map(item=>{
+    const tot=totalStock(item.id);
+    const locsDisplay=(item.locs||[]).join(', ');
+    const sl=statusLabel(item.status||'active');
+    const sc=statusColor(item.status||'active');
+    return `<tr>
+      <td>
+        <div style="font-weight:500;font-size:13px;">${item.name}</div>
+        ${item.note?`<div style="font-size:10px;color:var(--ink-faint);margin-top:1px;">${item.note}</div>`:''}
+      </td>
+      <td style="font-size:12px;color:var(--ink-faint);">${item.cat}</td>
+      <td><span class="status-pill" style="background:${sc}22;color:${sc};">${sl}</span></td>
+      <td class="td-num">${item.threshold||0}</td>
+      <td style="font-size:11px;color:var(--ink-faint);max-width:200px;">${locsDisplay}</td>
+      <td class="td-num">${item.status==='development'?'—':tot}</td>
+      <td style="text-align:center;">
+        <button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;" onclick="openCatalogueEdit('${item.id}')">Edit</button>
+        ${item.isCustom?`<button class="btn-del" onclick="removeCustomItem('${item.id}')" title="Delete">×</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openCatalogueEdit(id) {
+  const item=itemById(id); if(!item) return;
+  document.getElementById('ce-id').value=id;
+  document.getElementById('ce-name').value=item.name||'';
+  document.getElementById('ce-cat').value=item.cat||'Brochures';
+  document.getElementById('ce-status').value=item.status||'active';
+  document.getElementById('ce-threshold').value=item.threshold||0;
+  document.getElementById('ce-note').value=item.note||'';
+  document.getElementById('ce-locs').value=(item.locs||[]).join(', ');
+  document.getElementById('catalogue-edit-modal').style.display='flex';
+}
+function closeCatalogueEdit(){document.getElementById('catalogue-edit-modal').style.display='none';}
+function saveCatalogueEdit() {
+  const id=document.getElementById('ce-id').value;
+  const name=document.getElementById('ce-name').value.trim();
+  const cat=document.getElementById('ce-cat').value;
+  const status=document.getElementById('ce-status').value;
+  const threshold=+document.getElementById('ce-threshold').value||0;
+  const note=document.getElementById('ce-note').value.trim();
+  const locsRaw=document.getElementById('ce-locs').value;
+  const locs=locsRaw.split(',').map(l=>l.trim()).filter(Boolean);
+  if(!name){alert('Name is required.');return;}
+  // Save as override (works for both base and custom items)
+  const custom=(state.customItems||[]).find(i=>i.id===id);
+  if(custom){
+    Object.assign(custom,{name,cat,status,threshold,note,locs});
+    // Ensure stock slots exist for new locs
+    if(!state.stock[id]) state.stock[id]={};
+    locs.forEach(l=>{if(state.stock[id][l]===undefined) state.stock[id][l]=0;});
+  } else {
+    if(!state.catalogueOverrides) state.catalogueOverrides={};
+    if(!state.catalogueOverrides[id]) state.catalogueOverrides[id]={};
+    Object.assign(state.catalogueOverrides[id],{name,cat,status,threshold,note,locs});
+    // Ensure stock slots exist for new locs
+    if(!state.stock[id]) state.stock[id]={};
+    locs.forEach(l=>{if(state.stock[id][l]===undefined) state.stock[id][l]=0;});
+  }
+  saveState();
+  closeCatalogueEdit();
+  renderCatalogue();
+  showFeedback('cat-feedback',`✓ "${name}" updated.`);
+}
+function updateCatalogueItem(id, field, value) {
+  const custom = (state.customItems||[]).find(i=>i.id===id);
+  if (custom) { custom[field]=value; saveState(); return; }
+  if (!state.catalogueOverrides) state.catalogueOverrides={};
+  if (!state.catalogueOverrides[id]) state.catalogueOverrides[id]={};
+  state.catalogueOverrides[id][field]=value;
+  saveState();
+}
+
+// (Option A — removed dead duplicate-editor helpers openCatEdit/saveCatEdit/
+//  renderCatEditLocs/addCatEditLoc/removeCatEditLoc; the working editor is
+//  openCatalogueEdit/saveCatalogueEdit below.)
+function addCatalogueItem() {
+  const name=document.getElementById('cat-name').value.trim();
+  const cat=document.getElementById('cat-cat').value;
+  const status=document.getElementById('cat-status').value;
+  const threshold=+document.getElementById('cat-threshold').value||0;
+  const stockQty=+document.getElementById('cat-stock').value||0;
+  const budget=+document.getElementById('cat-budget').value||0;
+  const note=document.getElementById('cat-note').value.trim();
+  if(!name){alert('Please enter an item name.');return;}
+  const id='custom-'+uid();
+  const newItem={id,cat,name,threshold,note,locs:['Paris HQ'],status,budget,isCustom:true};
+  if(!state.customItems) state.customItems=[];
+  state.customItems.push(newItem);
+  if(!state.stock[id]) state.stock[id]={};
+  if(stockQty>0){
+    state.stock[id]['Paris HQ']=stockQty;
+    state.history.unshift({id:uid(),type:'manual',date:today(),ref:`Initial stock — ${name}`,details:`Added on creation`,itemId:id,loc:'Paris HQ',delta:stockQty,ts:Date.now()});
+  }
+  saveState();
+  showFeedback('cat-feedback',`✓ "${name}" added${status==='development'?' (In Development)':''}.`);
+  ['cat-name','cat-threshold','cat-stock','cat-budget','cat-note'].forEach(id=>document.getElementById(id).value='');
+  renderCatalogue();
+}
+function removeCustomItem(id) {
+  if(!confirm('Remove this item?')) return;
+  state.customItems=(state.customItems||[]).filter(i=>i.id!==id);
+  saveState(); renderCatalogue();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════════════════════
+function renderSettings() {
+  if(!state.suppliers) state.suppliers=[...DEFAULT_SUPPLIERS];
+  document.getElementById('suppliers-list').innerHTML=state.suppliers.map((s,i)=>`
+    <span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream-dark);border:1px solid var(--border);border-radius:99px;padding:4px 12px;font-size:13px;">
+      ${s} <button onclick="removeSupplier(${i})" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;">×</button>
+    </span>`).join('');
+}
+function addSupplier() {
+  const val=document.getElementById('new-supplier').value.trim();
+  if(!val) return;
+  if(!state.suppliers) state.suppliers=[...DEFAULT_SUPPLIERS];
+  if(state.suppliers.includes(val)){alert('Already exists.');return;}
+  state.suppliers.push(val); saveState();
+  document.getElementById('new-supplier').value=''; renderSettings();
+}
+function removeSupplier(i) { state.suppliers.splice(i,1); saveState(); renderSettings(); }
+
+// ══════════════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════════════════════════════════
+function exportData() {
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`lesAmis_stock_${today()}.json`;a.click();
+}
+function importData(e) {
+  const file=e.target.files[0];if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const imp=JSON.parse(ev.target.result);
+      if(!imp.stock) throw new Error();
+      if(!confirm('Import data? This will replace current data.')) return;
+      state=imp;saveState();renderPage(currentPage);updateTodoBadge();
+      alert('Imported successfully.');
+    }catch{alert('Invalid JSON file.');}
+  };
+  reader.readAsText(file);e.target.value='';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════
+function showFeedback(id,msg) {
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=msg;
+  setTimeout(()=>el.textContent='',4000);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+seedInitialStock();
+renderDashboard();
+updateTodoBadge();
+</script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "retail_stock_tracker_v2";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false } };
+  }
+
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
+  // AND height, all within ±2px of each other. Off unless the page opts in
+  // via data-om-multi-frame on the stop element — guards against card grids
+  // and pricing tables that match the geometry but aren't separate canvases.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var cands = [];
+    for (var k = 0; k < el.children.length; k++) {
+      var ch = el.children[k];
+      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+      var rc = rectOf(ch);
+      if (rc.width < 2 || rc.height < 2) continue;
+      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+      cands.push(rc);
+    }
+    if (cands.length >= 2) {
+      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
+      for (var q = 1; q < cands.length; q++)
+        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
+      if (ok) return { kind: 'multi-frame', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (__m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>
+
