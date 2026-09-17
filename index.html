@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E">
-<title>Retail Stock Tracker — Les Amis</title>
+<title>Les Amis Stock Tracker</title>
 <style>
 /* cyrillic-ext */
 @font-face {
@@ -562,9 +562,9 @@ tbody tr:hover td{background:var(--cream);}
 <div class="page active" id="page-dashboard">
   <div class="page-title">Dashboard</div>
   <div class="page-subtitle">Real-time stock overview across all locations</div>
-  <div class="alert alert-info" style="margin-bottom:1.1rem;">
+  <div class="alert alert-info" style="margin-bottom:1.1rem;" id="local-banner">
     <span>💾</span>
-    <div>Your data is saved automatically in this browser only — nothing is sent to a server. To keep your progress safe, use ⬇ Export JSON regularly to back it up, and avoid clearing your browser data. Switching browsers or devices? Re-import your backup with ⬆ Import JSON.</div>
+    <div id="local-banner-text">Your data is saved automatically in this browser only — nothing is sent to a server. To keep your progress safe, use ⬇ Export JSON regularly to back it up, and avoid clearing your browser data. Switching browsers or devices? Re-import your backup with ⬆ Import JSON.</div>
   </div>
   <div id="dash-alerts"></div>
   <div class="kpi-grid" id="dash-kpis"></div>
@@ -1079,7 +1079,7 @@ tbody tr:hover td{background:var(--cream);}
 <div class="modal-overlay" id="welcome-modal" style="display:none;">
   <div class="modal" style="width:480px;">
     <h3>👋 Welcome — let's keep your data safe</h3>
-    <p>This tracker saves everything in <strong>this browser only</strong>, on this device. There's no server yet, so your data isn't shared or synced automatically.</p>
+    <p id="welcome-desc">This tracker saves everything in <strong>this browser only</strong>, on this device. There's no server yet, so your data isn't shared or synced automatically.</p>
     <div class="alert alert-info" style="margin-bottom:0;">
       <span>💾</span>
       <div>Use <strong>Export JSON</strong> to back up your work, and <strong>Import JSON</strong> to restore it or share it with the team. The <strong>Backup &amp; Help</strong> page explains everything.</div>
@@ -2518,4 +2518,115 @@ try{
 </script>
 
 
+
+<script>
+/* ── Live team sync via claude.ai Artifact db capability ──
+   Activates only inside the claude.ai viewer (window.claude.use).
+   Everywhere else (Vercel, localhost, opened file) the app keeps
+   its existing localStorage-only behaviour. */
+(function(){
+  if (!(window.claude && typeof window.claude.use === 'function')) return;
+  var DOC='app/state', HISTORY_CAP=600;
+  var ref=null, lastRev=null, readOnly=false, writing=false, pendingWrite=false,
+      timer=null, applying=false, gotFirstSnap=false;
+
+  var pill=document.createElement('span');
+  pill.id='sync-pill';
+  pill.style.cssText='display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;white-space:nowrap;';
+  function setPill(mode){
+    var map={local:['#9aa0a6','Local only','Data stays in this browser only'],
+             live:['#66bb6a','Live','Shared with the team — changes sync automatically'],
+             ro:['#ffa726','Live · read only','You see live team data but cannot edit'],
+             err:['#ef5350','Sync error','Live sync hit an error — data kept locally']};
+    var m=map[mode]||map.local;
+    pill.innerHTML='<span style="width:7px;height:7px;border-radius:50%;background:'+m[0]+';display:inline-block;"></span>'+m[1];
+    pill.title=m[2];
+  }
+  setPill('local');
+  var actions=document.querySelector('.header-actions');
+  if(actions) actions.insertBefore(pill, actions.firstChild);
+
+  function liveCopy(){
+    var b=document.getElementById('local-banner-text');
+    if(b) b.innerHTML='<strong>Live team data.</strong> Your changes sync automatically to everyone who opens this page. ⬇ Export JSON still works any time as a personal backup.';
+    var w=document.getElementById('welcome-desc');
+    if(w) w.innerHTML='Good news — this tracker is now <strong>live</strong>: everyone on the team sees and edits the <strong>same stock</strong>, synced automatically. Export JSON remains available as a backup.';
+  }
+
+  function patchState(p){
+    if(!p.stock) p.stock={};
+    if(!p.history) p.history=[];
+    if(!p.orders) p.orders=[];
+    if(!p.transfers) p.transfers=[];
+    if(!p.todoItems) p.todoItems=[];
+    if(!p.doneTodos) p.doneTodos={};
+    if(!p.customItems) p.customItems=[];
+    if(!p.suppliers) p.suppliers=DEFAULT_SUPPLIERS.slice();
+    if(!p.budgetActuals) p.budgetActuals={};
+    if(!p.monthlyReminders) p.monthlyReminders={};
+    BASE_CATALOGUE.forEach(function(item){
+      if(!p.stock[item.id]) p.stock[item.id]={};
+      item.locs.forEach(function(loc){ if(p.stock[item.id][loc]===undefined) p.stock[item.id][loc]=0; });
+    });
+    return p;
+  }
+
+  function trimmedState(){
+    var s=JSON.parse(JSON.stringify(state));
+    if(Array.isArray(s.history) && s.history.length>HISTORY_CAP) s.history=s.history.slice(0,HISTORY_CAP);
+    return s;
+  }
+
+  function flush(){
+    if(!ref || readOnly || !gotFirstSnap) return;
+    if(writing){ pendingWrite=true; return; }
+    writing=true;
+    var rev=uid();
+    lastRev=rev;
+    ref.set({rev:rev, ts:Date.now(), state:trimmedState()}).then(function(){
+      writing=false; setPill('live');
+      if(pendingWrite){ pendingWrite=false; schedule(); }
+    }, function(e){
+      writing=false;
+      if(e && e.code==='invalid_argument'){ readOnly=true; setPill('ro'); }
+      else if(e && e.code==='unavailable'){ setTimeout(function(){ pendingWrite=false; schedule(); }, 1200+Math.random()*800); }
+      else setPill('err');
+      if(pendingWrite){ pendingWrite=false; schedule(); }
+    });
+  }
+  function schedule(){ clearTimeout(timer); timer=setTimeout(flush, 700); }
+
+  var origSave=saveState;
+  saveState=function(){ origSave(); if(!applying) schedule(); };
+
+  function applyRemote(data){
+    if(!data || !data.state) return;
+    applying=true;
+    try{
+      state=patchState(JSON.parse(JSON.stringify(data.state)));
+      origSave();
+      renderPage(currentPage);
+      updateTodoBadge();
+    }catch(e){}
+    applying=false;
+  }
+
+  window.claude.use('db').then(function(db){
+    if(!db) return;                      /* viewer without db: stay local */
+    try{ ref=db.doc(DOC); }catch(e){ return; }
+    ref.onSnapshot(function(snap){
+      var first=!gotFirstSnap;
+      gotFirstSnap=true;
+      if(!readOnly) setPill('live');
+      liveCopy();
+      if(snap.metadata && snap.metadata.hasPendingWrites) return;
+      if(!snap.exists){ if(first) schedule(); return; }   /* first-ever open seeds the store */
+      var data=snap.data();
+      if(data && data.rev && data.rev===lastRev) return;  /* our own confirmed write */
+      lastRev=data && data.rev || null;
+      applyRemote(data);
+    }, function(err){ setPill('err'); });
+  });
+})();
+</script>
 </body></html>
