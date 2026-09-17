@@ -510,6 +510,10 @@ tbody tr:hover td{background:var(--cream);}
   body.nav-open .nav-scrim{display:block;}
   .form-2,.form-3,.form-4{grid-template-columns:1fr;}
 }
+
+    .loc-checks{display:flex;flex-wrap:wrap;gap:7px 14px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;background:var(--white);max-height:120px;overflow-y:auto;}
+    .loc-checks .loc-check{display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;white-space:nowrap;text-transform:none;letter-spacing:0;margin:0;padding:0;font-weight:400;position:static;width:auto;}
+    .loc-checks input[type="checkbox"]{width:14px;height:14px;margin:0;padding:0;accent-color:var(--gold);flex:none;appearance:auto;-webkit-appearance:checkbox;position:static;display:inline-block;}
 </style>
 </head>
 <body>
@@ -866,11 +870,19 @@ tbody tr:hover td{background:var(--cream);}
     </div>
     <div class="form-row form-3">
       <div class="field"><label>Reorder Threshold</label><input type="number" id="cat-threshold" min="0" placeholder="0"></div>
-      <div class="field"><label>Initial Stock</label><input type="number" id="cat-stock" min="0" placeholder="0"></div>
-      <div class="field"><label>Initial Stock Location</label><select id="cat-loc">
-        <option>Paris HQ</option><option>Paris Stock</option><option>16CS London</option><option>MBE</option>
-        <option>Loulou Paris</option><option>Loulou Ramatuelle</option><option>Loulou Pirate</option><option>Loulou Courchevel</option><option>Le Flandrin</option><option>Ralph's</option><option>Grand Café</option>
-      </select></div>
+      <div class="field" style="grid-column:span 2;"><label>Locations</label><div class="loc-checks" id="cat-locs">
+        <label class="loc-check"><input type="checkbox" value="Paris HQ" class="cat-loc-cb">Paris HQ</label>
+        <label class="loc-check"><input type="checkbox" value="Paris Stock" class="cat-loc-cb">Paris Stock</label>
+        <label class="loc-check"><input type="checkbox" value="16CS London" class="cat-loc-cb">16CS London</label>
+        <label class="loc-check"><input type="checkbox" value="MBE" class="cat-loc-cb">MBE</label>
+        <label class="loc-check"><input type="checkbox" value="Loulou Paris" class="cat-loc-cb">Loulou Paris</label>
+        <label class="loc-check"><input type="checkbox" value="Loulou Ramatuelle" class="cat-loc-cb">Loulou Ramatuelle</label>
+        <label class="loc-check"><input type="checkbox" value="Loulou Pirate" class="cat-loc-cb">Loulou Pirate</label>
+        <label class="loc-check"><input type="checkbox" value="Loulou Courchevel" class="cat-loc-cb">Loulou Courchevel</label>
+        <label class="loc-check"><input type="checkbox" value="Le Flandrin" class="cat-loc-cb">Le Flandrin</label>
+        <label class="loc-check"><input type="checkbox" value="Ralph&#39;s" class="cat-loc-cb">Ralph&#39;s</label>
+        <label class="loc-check"><input type="checkbox" value="Grand Café" class="cat-loc-cb">Grand Café</label>
+      </div></div>
     </div>
     <div class="form-row form-3">
       <div class="field"><label>Budget allocated (€)</label><input type="number" id="cat-budget" min="0" placeholder="0.00" step="0.01"></div>
@@ -888,6 +900,12 @@ tbody tr:hover td{background:var(--cream);}
         <select id="cat-filter-cat" onchange="renderCatalogue()" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12px;background:var(--cream);">
           <option value="">All categories</option>
         </select>
+      <select id="cat-filter-status" onchange="renderCatalogue()" style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--white);">
+        <option value="">All statuses</option>
+        <option value="active">Active</option>
+        <option value="development">In Development</option>
+        <option value="discontinued">Discontinued</option>
+      </select>
       </div>
     </div>
     <div class="table-wrap"><table>
@@ -1062,9 +1080,20 @@ tbody tr:hover td{background:var(--cream);}
     <div class="field"><label>Notes</label><input type="text" id="ce-note" placeholder="Usage context, supplier…"></div>
   </div>
   <div class="field" style="margin-bottom:10px;">
-    <label>Locations (comma-separated, e.g. Paris HQ, Paris Stock, 16CS London)</label>
-    <input type="text" id="ce-locs" placeholder="Paris HQ, Paris Stock">
-    <div style="font-size:11px;color:var(--ink-faint);margin-top:3px;">Available: Paris HQ · Paris Stock · 16CS London · MBE · Loulou Paris · Loulou Ramatuelle · Loulou Pirate · Loulou Courchevel · Le Flandrin · Ralph's · Grand Café</div>
+    <label>Locations</label>
+    <div class="loc-checks" id="ce-locs-checks">
+      <label class="loc-check"><input type="checkbox" value="Paris HQ" class="ce-loc-cb">Paris HQ</label>
+      <label class="loc-check"><input type="checkbox" value="Paris Stock" class="ce-loc-cb">Paris Stock</label>
+      <label class="loc-check"><input type="checkbox" value="16CS London" class="ce-loc-cb">16CS London</label>
+      <label class="loc-check"><input type="checkbox" value="MBE" class="ce-loc-cb">MBE</label>
+      <label class="loc-check"><input type="checkbox" value="Loulou Paris" class="ce-loc-cb">Loulou Paris</label>
+      <label class="loc-check"><input type="checkbox" value="Loulou Ramatuelle" class="ce-loc-cb">Loulou Ramatuelle</label>
+      <label class="loc-check"><input type="checkbox" value="Loulou Pirate" class="ce-loc-cb">Loulou Pirate</label>
+      <label class="loc-check"><input type="checkbox" value="Loulou Courchevel" class="ce-loc-cb">Loulou Courchevel</label>
+      <label class="loc-check"><input type="checkbox" value="Le Flandrin" class="ce-loc-cb">Le Flandrin</label>
+      <label class="loc-check"><input type="checkbox" value="Ralph&#39;s" class="ce-loc-cb">Ralph's</label>
+      <label class="loc-check"><input type="checkbox" value="Grand Café" class="ce-loc-cb">Grand Café</label>
+    </div>
   </div>
   <div class="modal-actions">
     <button class="btn btn-ghost" onclick="closeCatalogueEdit()">Cancel</button>
@@ -1274,10 +1303,10 @@ function planShortfalls(plan) {
   Object.keys(agg).forEach(k=>{ const i=k.indexOf('@@'); const id=k.slice(0,i), loc=k.slice(i+2); const have=stockAt(id,loc); if(agg[k]>have) short.push(`\u2022 ${itemName(id)} at ${loc}: need ${agg[k]}, only ${have} in stock`); });
   return short;
 }
-function confirmDeductions(plan) {
+function confirmDeductions(plan, proceed) {
   const short=planShortfalls(plan);
-  if(!short.length) return true;
-  return confirm('Not enough stock for:\n\n'+short.join('\n')+'\n\nStock will be floored at 0 and totals may stop matching the log. Record anyway?');
+  if(!short.length){ proceed(); return; }
+  uiConfirm('Not enough stock for:\n\n'+short.join('\n')+'\n\nStock will be floored at 0 and totals may stop matching the log. Record anyway?', proceed, {okLabel:'Record anyway', title:'Not enough stock'});
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1786,12 +1815,13 @@ function submitEvent() {
   if(splits)plan.push({id:'ev-splits',loc:packLoc,qty:splits});
   if(nametags)plan.push({id:'ev-nametags',loc:packLoc,qty:nametags});
   if(!plan.length){alert('Please add at least one item.');return;}
-  if(!confirmDeductions(plan)) return;
+  confirmDeductions(plan, ()=>{
   plan.forEach(p=>deductStock(p.id,p.loc,p.qty,{...base,note:p.note}));
   saveState(); updateTodoBadge();
   showFeedback('ev-feedback',`✓ Event "${name}" saved.`);
   clearEventForm();
-}
+
+  });}
 function clearEventForm() {
   ['ev-name','ev-bags','ev-splits','ev-nametags','ev-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ev-date').value=today();
@@ -1816,14 +1846,15 @@ function submitWelcomePack(type) {
   if(!name||!date){alert('Please fill in member name and date.');return;}
   const base={type:'welcome_pack',date,ref:`Patron Welcome Pack — ${name}`,details:`${qty} pack(s) from ${loc}`};
   const comps=['wp-box','wp-rest-br','wp-office-br','wp-res-card','wp-letter'];
-  if(!confirmDeductions(comps.map(id=>({id,loc,qty})))) return;
+  confirmDeductions(comps.map(id=>({id,loc,qty})), ()=>{
   comps.forEach(id=>deductStock(id,loc,qty,base));
   saveState(); updateTodoBadge();
   showFeedback('wp-p-feedback',`✓ ${qty} Patron Pack(s) sent to ${name}.`);
   document.getElementById('wp-p-name').value='';
   document.getElementById('wp-p-qty').value='1';
   document.getElementById('wp-p-notes').value='';
-}
+
+  });}
 
 // ══════════════════════════════════════════════════════════════════
 // PROSPECT MEETING
@@ -1888,12 +1919,13 @@ function submitProspect() {
     }
   });
   if(!plan.length){alert('Please add at least one item.');return;}
-  if(!confirmDeductions(plan)) return;
+  confirmDeductions(plan, ()=>{
   plan.forEach(p=>deductStock(p.id,p.loc,p.qty,{...base,note:p.note}));
   saveState(); updateTodoBadge();
   showFeedback('pr-feedback',`✓ Meeting with ${name} saved.`);
   clearProspectForm();
-}
+
+  });}
 function clearProspectForm() {
   document.getElementById('pr-name').value='';
   document.getElementById('pr-date').value=today();
@@ -1927,7 +1959,7 @@ function submitRestaurantUpdate() {
   if(!rest||!period||!members){alert('Please fill in restaurant, period and member count.');return;}
   const base={type:'restaurant',date:period+'-01',ref:`${rest} — ${period} (${members} members)`,details:notes||'—'};
   const plan=['ch-box','ch-bag','ch-post'].map(id=>({id,loc:rest,qty:members}));
-  if(!confirmDeductions(plan)) return;
+  confirmDeductions(plan, ()=>{
   plan.forEach(p=>deductStock(p.id,p.loc,p.qty,base));
   saveState(); updateTodoBadge();
   showFeedback('rest-feedback',`✓ ${rest}: deducted ${members} of each chouquette item for ${period}.`);
@@ -1935,7 +1967,8 @@ function submitRestaurantUpdate() {
   document.getElementById('rest-notes').value='';
   document.getElementById('rest-preview').style.display='none';
   renderRestaurantStockGrid();
-}
+
+  });}
 function renderRestaurantStockGrid() {
   // Chouquettes per restaurant
   const grid=document.getElementById('rest-stock-grid');
@@ -2010,28 +2043,34 @@ function submitManual() {
   const qty=+document.getElementById('me-qty').value;
   const reason=document.getElementById('me-reason').value.trim();
   const date=document.getElementById('me-date').value;
-  if(!itemId||!qty||!date){alert('Please fill in item, date and quantity.');return;}
+  if(!itemId||!qty||!date){uiToast('Please fill in item, date and quantity.','warn');return;}
   const base={type:'manual',date,ref:`Manual — ${itemName(itemId)}`,details:reason||'—'};
   const bs=document.getElementById('me-bag-split');
   const bagSplit=bs&&bs.checked&&qty<0;
   const bagLoc=itemById('ev-bags')?.locs.includes(loc)?loc:'Paris HQ';
+  const finish=()=>{
+    saveState(); updateTodoBadge();
+    uiToast(`Saved: ${qty>0?'+':''}${qty} × ${itemName(itemId)} at ${loc} ✓`,'ok');
+    showFeedback('me-feedback',`✓ Saved: ${qty>0?'+':''}${qty} × ${itemName(itemId)} at ${loc}.`);
+    ['me-qty','me-reason'].forEach(id=>document.getElementById(id).value='');
+    if(bs) bs.checked=false; updateBagSplitPreview();
+  };
   if(qty<0){
     const absQ=Math.abs(qty);
     const plan=[{id:itemId,loc,qty:absQ}];
     if(bagSplit){ plan.push({id:'ev-bags',loc:bagLoc,qty:absQ}); plan.push({id:'ev-splits',loc:bagLoc,qty:absQ}); }
-    if(!confirmDeductions(plan)) return;
-    deductStock(itemId,loc,absQ,base);
-    if(bagSplit){
-      deductStock('ev-bags',bagLoc,absQ,{...base,ref:`${base.ref} (bag)`});
-      deductStock('ev-splits',bagLoc,absQ,{...base,ref:`${base.ref} (split)`});
-    }
+    confirmDeductions(plan, ()=>{
+      deductStock(itemId,loc,absQ,base);
+      if(bagSplit){
+        deductStock('ev-bags',bagLoc,absQ,{...base,ref:`${base.ref} (bag)`});
+        deductStock('ev-splits',bagLoc,absQ,{...base,ref:`${base.ref} (split)`});
+      }
+      finish();
+    });
   } else {
     addStock(itemId,loc,qty,base);
+    finish();
   }
-  saveState(); updateTodoBadge();
-  showFeedback('me-feedback',`✓ Saved: ${qty>0?'+':''}${qty} × ${itemName(itemId)} at ${loc}.`);
-  ['me-qty','me-reason'].forEach(id=>document.getElementById(id).value='');
-  if(bs) bs.checked=false; updateBagSplitPreview();
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2083,7 +2122,7 @@ function submitOrder() {
   const budget=+document.getElementById('ord-budget').value;
   const price=+document.getElementById('ord-price').value;
   let supplier=document.getElementById('ord-supplier').value;
-  if(supplier==='__other__') supplier=prompt('Supplier name:','')||'';
+  const go=(sup)=>{ supplier=sup;
   const date=document.getElementById('ord-date').value;
   const estDel=document.getElementById('ord-est-delivery').value;
   const actDel=document.getElementById('ord-actual-delivery').value;
@@ -2108,7 +2147,10 @@ function submitOrder() {
     if(delivered) addStock(itemId,loc,qty,{type:'order',date:actDel||date,ref:`Order received — ${itemName(itemId)}`,details:`${qty} from ${supplier||'supplier'} → ${loc}`});
   }
   saveState(); renderOrders(); updateTodoBadge();
+    uiToast(editingOrderId?'Order updated ✓':'Order saved ✓','ok');
   closeOrderModal();
+};
+  if(supplier==='__other__') uiPrompt('Supplier name:', v=>go((v||'').trim())); else go(supplier);
 }
 function markDelivered(id) {
   const ord=state.orders.find(o=>o.id===id);
@@ -2248,9 +2290,11 @@ function saveHistoryEdit() {
   renderHistory();
 }
 function deleteHistoryEntry(id) {
-  if (!confirm('Delete this history entry? This will NOT reverse the stock change automatically.')) return;
-  state.history = (state.history||[]).filter(h=>h.id!==id);
-  saveState(); renderHistory();
+  uiConfirm('Delete this history entry? This will NOT reverse the stock change automatically.', ()=>{
+    state.history=(state.history||[]).filter(h=>h.id!==id);
+    saveState(); renderHistory();
+    uiToast('History entry deleted.','ok');
+  }, {okLabel:'Delete', title:'Delete entry'});
 }
 function closeHistoryEdit() { document.getElementById('history-edit-modal').style.display='none'; }
 
@@ -2328,9 +2372,11 @@ function renderCatalogue() {
     const cur=catSel.value;
     catSel.innerHTML='<option value="">All categories</option>'+cats.map(cat=>`<option value="${cat}" ${cat===cur?'selected':''}>${cat}</option>`).join('');
   }
+  const filterStatus=document.getElementById('cat-filter-status')?.value||'';
   let items=getAllItems();
   if(search) items=items.filter(i=>i.name.toLowerCase().includes(search)||i.cat.toLowerCase().includes(search));
   if(filterCat) items=items.filter(i=>i.cat===filterCat);
+  if(filterStatus) items=items.filter(i=>(i.status||'active')===filterStatus);
 
   const statusLabel=s=>s==='development'?'In Development':s==='discontinued'?'Discontinued':'Active';
   const statusColor=s=>s==='development'?'var(--purple)':s==='discontinued'?'var(--ink-faint)':'var(--ok)';
@@ -2367,7 +2413,8 @@ function openCatalogueEdit(id) {
   document.getElementById('ce-threshold').value=item.threshold||0;
   document.getElementById('ce-note').value=item.note||'';
   document.getElementById('ce-lead').value=item.leadTime||'';
-  document.getElementById('ce-locs').value=(item.locs||[]).join(', ');
+  const _locs=item.locs||[];
+  document.querySelectorAll('.ce-loc-cb').forEach(cb=>{cb.checked=_locs.includes(cb.value);});
   document.getElementById('catalogue-edit-modal').style.display='flex';
 }
 function closeCatalogueEdit(){document.getElementById('catalogue-edit-modal').style.display='none';}
@@ -2379,9 +2426,9 @@ function saveCatalogueEdit() {
   const threshold=+document.getElementById('ce-threshold').value||0;
   const note=document.getElementById('ce-note').value.trim();
   const leadTime=document.getElementById('ce-lead').value.trim();
-  const locsRaw=document.getElementById('ce-locs').value;
-  const locs=locsRaw.split(',').map(l=>l.trim()).filter(Boolean);
-  if(!name){alert('Name is required.');return;}
+  const locs=[...document.querySelectorAll('.ce-loc-cb:checked')].map(cb=>cb.value);
+  if(!name){uiToast('Name is required.','warn');return;}
+  if(!locs.length){uiToast('Please select at least one location.','warn');return;}
   // Save as override (works for both base and custom items)
   const custom=(state.customItems||[]).find(i=>i.id===id);
   if(custom){
@@ -2400,6 +2447,8 @@ function saveCatalogueEdit() {
   saveState();
   closeCatalogueEdit();
   renderCatalogue();
+  updateTodoBadge();
+  uiToast(`"${name}" updated ✓`,'ok');
   showFeedback('cat-feedback',`✓ "${name}" updated.`);
 }
 function updateCatalogueItem(id, field, value) {
@@ -2419,30 +2468,32 @@ function addCatalogueItem() {
   const cat=document.getElementById('cat-cat').value;
   const status=document.getElementById('cat-status').value;
   const threshold=+document.getElementById('cat-threshold').value||0;
-  const stockQty=+document.getElementById('cat-stock').value||0;
   const budget=+document.getElementById('cat-budget').value||0;
   const note=document.getElementById('cat-note').value.trim();
   const leadTime=document.getElementById('cat-lead').value.trim();
-  const initLoc=document.getElementById('cat-loc').value||'Paris HQ';
-  if(!name){alert('Please enter an item name.');return;}
+  const locs=[...document.querySelectorAll('.cat-loc-cb:checked')].map(cb=>cb.value);
+  if(!name){uiToast('Please enter an item name.','warn');return;}
+  if(!locs.length){uiToast('Please select at least one location.','warn');return;}
   const id='custom-'+uid();
-  const newItem={id,cat,name,threshold,note,leadTime,locs:[initLoc],status,budget,isCustom:true};
+  const newItem={id,cat,name,threshold,note,leadTime,locs,status,budget,isCustom:true};
   if(!state.customItems) state.customItems=[];
   state.customItems.push(newItem);
   if(!state.stock[id]) state.stock[id]={};
-  if(stockQty>0){
-    state.stock[id][initLoc]=stockQty;
-    state.history.unshift({id:uid(),type:'manual',date:today(),ref:`Initial stock — ${name}`,details:`Added on creation`,itemId:id,loc:initLoc,delta:stockQty,ts:Date.now()});
-  }
+  locs.forEach(l=>{ if(state.stock[id][l]===undefined) state.stock[id][l]=0; });
   saveState();
-  showFeedback('cat-feedback',`✓ "${name}" added${status==='development'?' (In Development)':''}.`);
-  ['cat-name','cat-threshold','cat-stock','cat-budget','cat-lead','cat-note'].forEach(id=>document.getElementById(id).value='');
+  uiToast(`"${name}" added${status==='development'?' (In Development)':''} ✓`,'ok');
+  showFeedback('cat-feedback',`✓ "${name}" added. Record stock via Orders or Manual Entry.`);
+  ['cat-name','cat-threshold','cat-budget','cat-lead','cat-note'].forEach(fid=>document.getElementById(fid).value='');
+  document.querySelectorAll('.cat-loc-cb:checked').forEach(cb=>cb.checked=false);
   renderCatalogue();
 }
 function removeCustomItem(id) {
-  if(!confirm('Remove this item?')) return;
+  uiConfirm('Remove this item?', ()=>{
   state.customItems=(state.customItems||[]).filter(i=>i.id!==id);
   saveState(); renderCatalogue();
+
+    uiToast('Item removed.','ok');
+  }, {okLabel:'Remove'});
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2480,10 +2531,11 @@ function importData(e) {
     try{
       const imp=JSON.parse(ev.target.result);
       if(!imp.stock) throw new Error();
-      if(!confirm('Import data? This will replace current data.')) return;
-      state=imp;saveState();renderPage(currentPage);updateTodoBadge();
-      alert('Imported successfully.');
-    }catch{alert('Invalid JSON file.');}
+      uiConfirm('Import data? This will replace current data.', ()=>{
+        state=imp;saveState();renderPage(currentPage);updateTodoBadge();
+        uiToast('Imported successfully.','ok');
+      }, {okLabel:'Import'});
+    }catch{uiToast('Invalid JSON file.','err');}
   };
   reader.readAsText(file);e.target.value='';
 }
@@ -2519,6 +2571,66 @@ try{
 
 
 
+
+<script>
+/* ── In-page dialogs: native alert/confirm/prompt are silently blocked
+   inside the claude.ai artifact iframe, so every message goes through
+   these instead. ── */
+(function(){
+  function ensureToastWrap(){
+    var w=document.getElementById('ui-toast-wrap');
+    if(!w){ w=document.createElement('div'); w.id='ui-toast-wrap';
+      w.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:11000;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;max-width:92vw;';
+      document.body.appendChild(w); }
+    return w;
+  }
+  window.uiToast=function(msg, kind){
+    var colors={ok:'#2e7d32',warn:'#b26a00',err:'#c62828',info:'#333'};
+    var t=document.createElement('div');
+    t.style.cssText='pointer-events:auto;background:'+(colors[kind]||colors.info)+';color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;box-shadow:0 4px 18px rgba(0,0,0,.25);max-width:520px;white-space:pre-wrap;';
+    t.textContent=msg;
+    ensureToastWrap().appendChild(t);
+    setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){t.remove();},450); }, 4200);
+  };
+  function buildDialog(){
+    var ov=document.getElementById('ui-dialog');
+    if(ov) return ov;
+    ov=document.createElement('div');
+    ov.id='ui-dialog';
+    ov.className='modal-overlay';
+    ov.style.cssText='display:none;z-index:10500;';
+    ov.innerHTML='<div class="modal" style="width:440px;max-width:92vw;">'
+      +'<h3 id="ui-dialog-title" style="margin-top:0;">Please confirm</h3>'
+      +'<div id="ui-dialog-msg" style="white-space:pre-wrap;font-size:13px;line-height:1.5;margin-bottom:12px;"></div>'
+      +'<input id="ui-dialog-input" type="text" style="display:none;width:100%;padding:8px 10px;border:1px solid var(--border,#ccc);border-radius:7px;font-family:inherit;font-size:13px;margin-bottom:12px;">'
+      +'<div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;">'
+      +'<button class="btn btn-ghost" id="ui-dialog-cancel">Cancel</button>'
+      +'<button class="btn btn-primary" id="ui-dialog-ok">OK</button></div></div>';
+    document.body.appendChild(ov);
+    return ov;
+  }
+  function openDialog(opts){
+    var ov=buildDialog();
+    document.getElementById('ui-dialog-title').textContent=opts.title||'Please confirm';
+    document.getElementById('ui-dialog-msg').textContent=opts.msg||'';
+    var inp=document.getElementById('ui-dialog-input');
+    inp.style.display=opts.input?'block':'none';
+    inp.value=opts.def||'';
+    var ok=document.getElementById('ui-dialog-ok'), cancel=document.getElementById('ui-dialog-cancel');
+    ok.textContent=opts.okLabel||'OK';
+    cancel.textContent=opts.cancelLabel||'Cancel';
+    function close(){ ov.style.display='none'; ok.onclick=null; cancel.onclick=null; }
+    ok.onclick=function(){ var v=inp.value; close(); if(opts.onOk) opts.onOk(v); };
+    cancel.onclick=function(){ close(); if(opts.onCancel) opts.onCancel(); };
+    ov.style.display='flex';
+    if(opts.input) setTimeout(function(){ inp.focus(); },50);
+  }
+  window.uiConfirm=function(msg, onOk, opts){ opts=opts||{}; openDialog({msg:msg,onOk:onOk,onCancel:opts.onCancel,okLabel:opts.okLabel,title:opts.title,cancelLabel:opts.cancelLabel}); };
+  window.uiPrompt=function(msg, cb, def){ openDialog({msg:msg,input:true,def:def||'',title:'Input needed',onOk:function(v){cb(v);},onCancel:function(){cb(null);}}); };
+  /* Route every legacy alert() through the toast so no message is ever lost. */
+  window.alert=function(m){ uiToast(String(m),'warn'); };
+})();
+</script>
 <script>
 /* ── Live team sync via claude.ai Artifact db capability ──
    Activates only inside the claude.ai viewer (window.claude.use).
@@ -2588,7 +2700,10 @@ try{
       if(pendingWrite){ pendingWrite=false; schedule(); }
     }, function(e){
       writing=false;
-      if(e && e.code==='invalid_argument'){ readOnly=true; setPill('ro'); }
+      if(e && e.code==='invalid_argument'){ readOnly=true; setPill('ro');
+        var bt=document.getElementById('local-banner-text');
+        if(bt) bt.innerHTML='<strong>Read-only access.</strong> You can see the live team data, but your own changes stay in this browser and are NOT shared. Ask the owner for \u201cCan interact\u201d access.';
+        uiToast('Read-only access — your changes are not shared with the team.','warn'); }
       else if(e && e.code==='unavailable'){ setTimeout(function(){ pendingWrite=false; schedule(); }, 1200+Math.random()*800); }
       else setPill('err');
       if(pendingWrite){ pendingWrite=false; schedule(); }
