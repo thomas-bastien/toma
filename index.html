@@ -2714,6 +2714,7 @@ try{
   var origSave=saveState;
   saveState=function(){ origSave(); if(!applying) schedule(); };
 
+  var appliedOnce=false;
   function applyRemote(data){
     if(!data || !data.state) return;
     applying=true;
@@ -2722,7 +2723,9 @@ try{
       origSave();
       renderPage(currentPage);
       updateTodoBadge();
-    }catch(e){}
+      if(appliedOnce && typeof uiToast==='function') uiToast('🔄 Stock updated by a teammate — your view just refreshed.','info');
+      appliedOnce=true;
+    }catch(e){ appliedOnce=true; }
     applying=false;
   }
 
