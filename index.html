@@ -2747,4 +2747,112 @@ try{
   });
 })();
 </script>
+
+<script>
+/* ── Live team sync via Netlify Function + Blobs ──
+   Activates only when /api/state answers (the Netlify deployment).
+   Inside claude.ai the artifact-db layer above takes over instead;
+   on Vercel/localhost/file the probe fails and the app stays local. */
+(function(){
+  if (window.claude && typeof window.claude.use === 'function') return;
+  var API='/api/state', HISTORY_CAP=600, POLL_MS=5000;
+  var lastRev=null, writing=false, pendingWrite=false, timer=null,
+      applying=false, live=false, appliedOnce=false;
+
+  var pill=document.createElement('span');
+  pill.id='sync-pill';
+  pill.style.cssText='display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;white-space:nowrap;';
+  function setPill(mode){
+    var map={local:['#9aa0a6','Local only','Data stays in this browser only'],
+             live:['#66bb6a','Live','Shared with the team — changes sync automatically'],
+             err:['#ef5350','Sync error','Live sync hit an error — data kept locally']};
+    var m=map[mode]||map.local;
+    pill.innerHTML='<span style="width:7px;height:7px;border-radius:50%;background:'+m[0]+';display:inline-block;"></span>'+m[1];
+    pill.title=m[2];
+  }
+  function mountPill(){
+    if(document.getElementById('sync-pill')) return;
+    var actions=document.querySelector('.header-actions');
+    if(actions) actions.insertBefore(pill, actions.firstChild);
+  }
+
+  function liveCopy(){
+    var b=document.getElementById('local-banner-text');
+    if(b) b.innerHTML='<strong>Live team data.</strong> Your changes sync automatically to everyone who opens this page. ⬇ Export JSON still works any time as a personal backup.';
+    var w=document.getElementById('welcome-desc');
+    if(w) w.innerHTML='Good news — this tracker is <strong>live</strong>: everyone on the team sees and edits the <strong>same stock</strong>, synced automatically. Export JSON remains available as a backup.';
+  }
+
+  function patchState(p){
+    if(!p.stock) p.stock={};
+    if(!p.history) p.history=[];
+    if(!p.orders) p.orders=[];
+    if(!p.transfers) p.transfers=[];
+    if(!p.todoItems) p.todoItems=[];
+    if(!p.doneTodos) p.doneTodos={};
+    if(!p.customItems) p.customItems=[];
+    if(!p.suppliers) p.suppliers=DEFAULT_SUPPLIERS.slice();
+    if(!p.budgetActuals) p.budgetActuals={};
+    if(!p.monthlyReminders) p.monthlyReminders={};
+    BASE_CATALOGUE.forEach(function(item){
+      if(!p.stock[item.id]) p.stock[item.id]={};
+      item.locs.forEach(function(loc){ if(p.stock[item.id][loc]===undefined) p.stock[item.id][loc]=0; });
+    });
+    return p;
+  }
+  function trimmedState(){
+    var s=JSON.parse(JSON.stringify(state));
+    if(Array.isArray(s.history) && s.history.length>HISTORY_CAP) s.history=s.history.slice(0,HISTORY_CAP);
+    return s;
+  }
+  function applyRemote(doc){
+    if(!doc || !doc.state) return;
+    applying=true;
+    try{
+      state=patchState(JSON.parse(JSON.stringify(doc.state)));
+      origSave();
+      renderPage(currentPage);
+      updateTodoBadge();
+      if(appliedOnce && typeof uiToast==='function') uiToast('🔄 Stock updated by a teammate — your view just refreshed.','info');
+      appliedOnce=true;
+    }catch(e){ appliedOnce=true; }
+    applying=false;
+  }
+
+  function flush(){
+    if(!live) return;
+    if(writing){ pendingWrite=true; return; }
+    writing=true;
+    var rev=uid();
+    lastRev=rev;
+    fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:rev,state:trimmedState()})})
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); setPill('live'); })
+      .catch(function(){ setPill('err'); })
+      .then(function(){ writing=false; if(pendingWrite){ pendingWrite=false; schedule(); } });
+  }
+  function schedule(){ clearTimeout(timer); timer=setTimeout(flush, 700); }
+
+  var origSave=saveState;
+
+  function poll(){
+    if(document.hidden) return;
+    fetch(API,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(doc){
+      if(!live){ live=true; mountPill(); setPill('live'); liveCopy(); }
+      if(writing||pendingWrite) return;
+      if(doc && doc.rev && doc.rev!==lastRev){ lastRev=doc.rev; applyRemote(doc); }
+      else if(!doc && !appliedOnce){ appliedOnce=true; schedule(); } /* empty store: seed with local */
+    }).catch(function(){ if(live) setPill('err'); });
+  }
+
+  /* probe once; only take over saveState when the API exists */
+  fetch(API,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(doc){
+    live=true; mountPill(); setPill('live'); liveCopy();
+    saveState=function(){ origSave(); if(!applying) schedule(); };
+    if(doc && doc.rev){ lastRev=doc.rev; applyRemote(doc); appliedOnce=true; }
+    else { appliedOnce=true; schedule(); }
+    setInterval(poll, POLL_MS);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
+  }).catch(function(){ /* not on Netlify: stay local */ });
+})();
+</script>
 </body></html>
