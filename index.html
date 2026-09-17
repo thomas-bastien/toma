@@ -1,22 +1,397 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-
-
-<style data-omelette-print-defaults>
-@media print {
-  @page { margin: 0.5in; }
-  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
-  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
-  img, svg { max-width: 100%; }
-  p { orphans: 3; widows: 3; }
-}
-</style>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Retail Stock Tracker — Les Amis</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("3b320504-c23b-4989-a0da-27dc3f236319") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("c5e0861a-23ee-4fef-9431-e015e3ecb066") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* math */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("b27c2f79-8772-4c72-b076-f54bb367b128") format('woff2');
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+/* symbols */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("62d6b71e-0986-4bb9-9595-fd6f9f542907") format('woff2');
+  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AD, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F7FF, U+1F800-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FA89, U+1FA8F-1FAC6, U+1FACE-1FADC, U+1FADF-1FAE9, U+1FAF0-1FAF8, U+1FB00-1FBFF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("7b78513e-5fb8-4f05-8f8d-eb755e106c03") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("1978ee88-59a7-4071-9605-74e1c4db39e6") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("8e4fb209-aeed-42e7-8c2f-7033e63ea6de") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("29671bc2-306a-422f-9283-037e84739d00") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("4bbf2a9c-e214-4f6a-ba81-d8781dc61468") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* math */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("3f1517ad-2e3f-46a3-b7bd-e54f18dfd83c") format('woff2');
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+/* symbols */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("31014d19-66af-4b04-bac1-22f3b8f4f163") format('woff2');
+  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AD, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F7FF, U+1F800-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FA89, U+1FA8F-1FAC6, U+1FACE-1FADC, U+1FADF-1FAE9, U+1FAF0-1FAF8, U+1FB00-1FBFF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("a616ab95-bba1-49fd-89b6-843058c5d732") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("84490bdf-cee6-440f-a37d-489f304355d0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("05b2742a-f668-4f2f-ae8e-142c7e834540") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("29671bc2-306a-422f-9283-037e84739d00") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("4bbf2a9c-e214-4f6a-ba81-d8781dc61468") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* math */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("3f1517ad-2e3f-46a3-b7bd-e54f18dfd83c") format('woff2');
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+/* symbols */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("31014d19-66af-4b04-bac1-22f3b8f4f163") format('woff2');
+  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AD, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F7FF, U+1F800-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FA89, U+1FA8F-1FAC6, U+1FACE-1FADC, U+1FADF-1FAE9, U+1FAF0-1FAF8, U+1FB00-1FBFF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("a616ab95-bba1-49fd-89b6-843058c5d732") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("84490bdf-cee6-440f-a37d-489f304355d0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("05b2742a-f668-4f2f-ae8e-142c7e834540") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("29671bc2-306a-422f-9283-037e84739d00") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("4bbf2a9c-e214-4f6a-ba81-d8781dc61468") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* math */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("3f1517ad-2e3f-46a3-b7bd-e54f18dfd83c") format('woff2');
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+/* symbols */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("31014d19-66af-4b04-bac1-22f3b8f4f163") format('woff2');
+  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AD, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F7FF, U+1F800-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FA89, U+1FA8F-1FAC6, U+1FACE-1FADC, U+1FADF-1FAE9, U+1FAF0-1FAF8, U+1FB00-1FBFF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("a616ab95-bba1-49fd-89b6-843058c5d732") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("84490bdf-cee6-440f-a37d-489f304355d0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("05b2742a-f668-4f2f-ae8e-142c7e834540") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("41d32a91-9103-4013-9993-c8c61a734571") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("9cfae449-66bd-409f-85a4-9a232372316b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("22596a5a-ef0b-4d51-8810-a16be6861f24") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("c7be871f-18df-49e3-9d6f-bee66e1d226e") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("91154955-d801-424b-9f35-5a3b7886e787") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("d9709eaa-53a3-420b-975b-6868587fd799") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("6dbff483-6f25-461b-96eb-78c24bfbc094") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("5f0b3fc4-ceb6-482e-a816-8d4662af3940") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("ffdb7c0e-bcd2-4ead-be53-53f7baceb047") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("99c5b154-2348-4fd1-b179-52060d11bbdd") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("1f977b5f-671b-498e-bf81-6fa2105ecdd7") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("67c66950-bfe0-4fff-897c-2df7ef9bcdb9") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("60b1fe0f-94ee-4ca5-be20-e577c4df8ddd") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("d42a4b6e-132f-45aa-93c5-30c2d294965b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("16645ad4-caef-41cb-a0e6-faf3dc8688c6") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --gold:#D97757;--gold-light:#FBEDE7;--gold-dark:#B0512F;
@@ -137,21 +512,11 @@ tbody tr:hover td{background:var(--cream);}
 </style>
 </head>
 <body>
-<template id="__bundler_thumbnail">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <rect width="100" height="100" fill="#1A1814"/>
-    <g transform="translate(30,30)" fill="none" stroke="#C9A96E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="0" y="6" width="40" height="34" rx="3"/>
-      <path d="M0 16 H40"/>
-      <path d="M12 6 V0 H28 V6"/>
-      <path d="M14 27 H26"/>
-    </g>
-  </svg>
-</template>
+
 <header>
   <div style="display:flex;align-items:center;gap:12px;">
     <button class="btn-sm btn-dark menu-toggle" onclick="toggleSidebar()" aria-label="Open menu" style="font-size:15px;padding:5px 11px;">☰</button>
-    <div class="logo"><img src="assets/logo-lesamis.svg" alt="Les Amis"><span>Retail Stock Tracker</span></div>
+    <div class="logo"><img src="33b509e6-f3f2-4c4a-8c05-aa415ffac47d" alt="Les Amis"><span>Retail Stock Tracker</span></div>
   </div>
   <div class="header-actions">
     <button class="btn-sm btn-dark" onclick="exportData()">⬇ Export JSON</button>
@@ -165,6 +530,7 @@ tbody tr:hover td{background:var(--cream);}
   <div class="sidebar-label">Overview</div>
   <div class="sidebar-item active" data-page="dashboard" onclick="nav('dashboard')"><span class="icon">📊</span>Dashboard</div>
   <div class="sidebar-item" data-page="todo" onclick="nav('todo')"><span class="icon">✅</span>To Do <span id="todo-badge" style="margin-left:auto;background:var(--danger);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;display:none;"></span></div>
+  <div class="sidebar-item" data-page="help" onclick="nav('help')"><span class="icon">💾</span>Backup &amp; Help</div>
   <div class="sidebar-divider"></div>
   <div class="sidebar-label">Log Operations</div>
   <div class="sidebar-item" data-page="op-event" onclick="nav('op-event')"><span class="icon">🎉</span>Event</div>
@@ -223,7 +589,7 @@ tbody tr:hover td{background:var(--cream);}
       <div class="field"><label>Priority</label>
         <select id="todo-priority">
           <option value="high">High</option>
-          <option value="medium" selected>Medium</option>
+          <option value="medium" selected="">Medium</option>
           <option value="low">Low</option>
         </select>
       </div>
@@ -288,7 +654,7 @@ tbody tr:hover td{background:var(--cream);}
         <div class="field"><label>From</label><select id="wp-p-loc"><option value="MBE">MBE</option><option value="Paris HQ">Paris HQ</option></select></div>
       </div>
       <div class="field" style="margin-bottom:1rem;"><label>Notes</label><textarea id="wp-p-notes"></textarea></div>
-      <div style="display:flex;justify-content:flex-end;"><button class="btn btn-primary" onclick="submitWelcomePack('patron')">Save & Deduct Stock</button></div>
+      <div style="display:flex;justify-content:flex-end;"><button class="btn btn-primary" onclick="submitWelcomePack('patron')">Save &amp; Deduct Stock</button></div>
       <div id="wp-p-feedback" class="feedback"></div>
     </div>
     <div id="wp-annual" style="display:none;">
@@ -344,7 +710,7 @@ tbody tr:hover td{background:var(--cream);}
     </div>
     <div id="rest-preview" style="display:none;margin-bottom:1rem;"></div>
     <div style="display:flex;justify-content:flex-end;">
-      <button class="btn btn-primary" onclick="submitRestaurantUpdate()">Save & Update Stock</button>
+      <button class="btn btn-primary" onclick="submitRestaurantUpdate()">Save &amp; Update Stock</button>
     </div>
     <div id="rest-feedback" class="feedback"></div>
   </div>
@@ -426,8 +792,11 @@ tbody tr:hover td{background:var(--cream);}
   <div class="page-title">Stock Transfers</div>
   <div class="page-subtitle">Move stock between locations (including restaurants)</div>
   <div class="card">
-    <div class="form-row form-3">
-      <div class="field"><label>Item</label><select id="tr-item" onchange="updateTransferLocs()"></select></div>
+    <div class="form-row form-2">
+      <div class="field"><label>Category</label><select id="tr-cat" onchange="updateTransferItems()"></select></div>
+      <div class="field"><label>Item</label><select id="tr-item"></select></div>
+    </div>
+    <div class="form-row form-2">
       <div class="field"><label>From</label><select id="tr-from"></select></div>
       <div class="field"><label>To</label><select id="tr-to"></select></div>
     </div>
@@ -469,7 +838,7 @@ tbody tr:hover td{background:var(--cream);}
 <!-- BUDGET -->
 <div class="page" id="page-budget">
   <div class="page-title">Budget</div>
-  <div class="page-subtitle">Pre-opening marketing & membership budget — actuals updated via orders or manually</div>
+  <div class="page-subtitle">Pre-opening marketing &amp; membership budget — actuals updated via orders or manually</div>
   <div id="budget-content"></div>
 </div>
 
@@ -496,10 +865,17 @@ tbody tr:hover td{background:var(--cream);}
     </div>
     <div class="form-row form-3">
       <div class="field"><label>Reorder Threshold</label><input type="number" id="cat-threshold" min="0" placeholder="0"></div>
-      <div class="field"><label>Initial Stock (Paris HQ)</label><input type="number" id="cat-stock" min="0" placeholder="0"></div>
-      <div class="field"><label>Budget allocated (€)</label><input type="number" id="cat-budget" min="0" placeholder="0.00" step="0.01"></div>
+      <div class="field"><label>Initial Stock</label><input type="number" id="cat-stock" min="0" placeholder="0"></div>
+      <div class="field"><label>Initial Stock Location</label><select id="cat-loc">
+        <option>Paris HQ</option><option>Paris Stock</option><option>16CS London</option><option>MBE</option>
+        <option>Loulou Paris</option><option>Loulou Ramatuelle</option><option>Loulou Pirate</option><option>Loulou Courchevel</option><option>Le Flandrin</option><option>Ralph's</option><option>Grand Café</option>
+      </select></div>
     </div>
-    <div class="field" style="margin-bottom:1rem;"><label>Notes</label><input type="text" id="cat-note" placeholder="Usage context, supplier…"></div>
+    <div class="form-row form-3">
+      <div class="field"><label>Budget allocated (€)</label><input type="number" id="cat-budget" min="0" placeholder="0.00" step="0.01"></div>
+      <div class="field"><label>Time of production &amp; delivery</label><input type="text" id="cat-lead" placeholder="e.g. 3 weeks"></div>
+      <div class="field"><label>Notes</label><input type="text" id="cat-note" placeholder="Usage context, supplier…"></div>
+    </div>
     <button class="btn btn-primary" onclick="addCatalogueItem()">Add Item</button>
     <div id="cat-feedback" class="feedback"></div>
   </div>
@@ -514,7 +890,7 @@ tbody tr:hover td{background:var(--cream);}
       </div>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Reorder threshold</th><th>Locations</th><th>Total stock</th><th style="text-align:center">Actions</th></tr></thead>
+      <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Reorder threshold</th><th>Prod. &amp; delivery</th><th>Locations</th><th>Total stock</th><th style="text-align:center">Actions</th></tr></thead>
       <tbody id="catalogue-body"></tbody>
     </table></div>
   </div>
@@ -533,33 +909,86 @@ tbody tr:hover td{background:var(--cream);}
   </div>
 </div>
 
+<!-- BACKUP & HELP -->
+<div class="page" id="page-help">
+  <div class="page-title">Backup &amp; Help</div>
+  <div class="page-subtitle">How to keep your work safe — and share it with the team</div>
+
+  <div class="alert alert-info" style="margin-bottom:1.25rem;">
+    <span>ℹ️</span>
+    <div>This tracker has <strong>no server yet</strong>. Everything you enter is saved <strong>only in this browser, on this device</strong>. It isn't shared automatically between people, and it doesn't sync across your phone and computer — each one keeps its own copy.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💾 The 3 things to remember</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#fff;font-family:'Poppins',sans-serif;font-weight:500;display:flex;align-items:center;justify-content:center;font-size:14px;">1</div>
+        <div><strong>Export regularly.</strong> Click <strong>⬇ Export JSON</strong> (top-right, or the button below) to save a backup file of your data. Do it whenever you've made important changes.</div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#fff;font-family:'Poppins',sans-serif;font-weight:500;display:flex;align-items:center;justify-content:center;font-size:14px;">2</div>
+        <div><strong>Import to restore or move.</strong> Click <strong>⬆ Import JSON</strong> and pick a backup file to load it onto another browser/device — or to share your state with someone else.</div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#fff;font-family:'Poppins',sans-serif;font-weight:500;display:flex;align-items:center;justify-content:center;font-size:14px;">3</div>
+        <div><strong>Export before you close</strong> if you made important changes — so nothing is lost.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.25rem;padding-top:1.1rem;border-top:1px solid var(--border);">
+      <button class="btn btn-gold" onclick="exportData()">⬇ Export JSON now</button>
+      <label class="btn btn-ghost" style="cursor:pointer;">⬆ Import JSON file<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔄 Sharing with the team</div>
+    <p style="margin:0 0 .6rem;">Until real-time sync arrives, you share data by passing the backup file around:</p>
+    <ul style="margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px;">
+      <li><strong>To send your latest version:</strong> do an <strong>Export JSON</strong> and send the file.</li>
+      <li><strong>To get someone's version:</strong> receive their file and do an <strong>Import JSON</strong>.</li>
+    </ul>
+    <div class="alert alert-warn" style="margin-top:1rem;margin-bottom:0;">
+      <span>⚠️</span>
+      <div>Importing <strong>replaces</strong> all current data with the file's contents. Export your own copy first if you're not sure.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-title">✅ A few good habits</div>
+    <ul style="margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px;">
+      <li>Don't clear the browser history/cache for this site — it erases everything.</li>
+      <li>Avoid private / incognito mode (data isn't kept after you close it).</li>
+      <li>Real-time shared &amp; synced data is coming soon.</li>
+    </ul>
+  </div>
+</div>
+
 </main>
 </div>
 
 <!-- ORDER MODAL -->
 <div class="modal-overlay" id="order-modal" style="display:none" onclick="if(event.target===this)closeOrderModal()">
 <div class="modal">
-  <h3>New Purchase Order</h3>
+  <h3 id="order-modal-title">New Purchase Order</h3>
   <p>Record an order. Fill in actual delivery date to mark as already received.</p>
   <div class="form-row form-2">
+    <div class="field"><label>Category</label><select id="ord-cat" onchange="updateOrderItems()"></select></div>
     <div class="field"><label>Item</label><select id="ord-item"></select></div>
-    <div class="field"><label>Target Location</label><select id="ord-loc">
-      <option value="Paris HQ">Paris HQ</option><option value="Paris Stock">Paris Stock</option>
-      <option value="16CS London">16CS London</option><option value="MBE">MBE</option>
-    </select></div>
+  </div>
+  <div class="form-row form-2">
+    <div class="field"><label>Target Location</label><select id="ord-loc"></select></div>
+    <div class="field"><label>Supplier</label><select id="ord-supplier"></select></div>
   </div>
   <div class="form-row form-3">
     <div class="field"><label>Qty ordered</label><input type="number" id="ord-qty" min="1" placeholder="0"></div>
     <div class="field"><label>Budget (€)</label><input type="number" id="ord-budget" placeholder="0.00" step="0.01"></div>
     <div class="field"><label>Actual price (€)</label><input type="number" id="ord-price" placeholder="0.00" step="0.01"></div>
   </div>
-  <div class="form-row form-2">
-    <div class="field"><label>Supplier</label><select id="ord-supplier"></select></div>
-    <div class="field"><label>Date ordered</label><input type="date" id="ord-date"></div>
-  </div>
-  <div class="form-row form-2">
-    <div class="field"><label>Est. delivery</label><input type="date" id="ord-est-delivery"></div>
-    <div class="field"><label>Actual delivery (if received)</label><input type="date" id="ord-actual-delivery"></div>
+  <div class="form-row form-3">
+    <div class="field"><label>Date ordered</label><input type="date" id="ord-date" autocomplete="off"></div>
+    <div class="field"><label>Est. delivery</label><input type="date" id="ord-est-delivery" autocomplete="off"></div>
+    <div class="field"><label>Actual delivery (if received)</label><input type="date" id="ord-actual-delivery" autocomplete="off"></div>
   </div>
   <div class="field" style="margin-bottom:10px;"><label>Notes / Issues</label><textarea id="ord-notes" style="min-height:50px;"></textarea></div>
   <div class="modal-actions">
@@ -627,7 +1056,10 @@ tbody tr:hover td{background:var(--cream);}
     </div>
     <div class="field"><label>Reorder Threshold</label><input type="number" id="ce-threshold" min="0" placeholder="0"></div>
   </div>
-  <div class="field" style="margin-bottom:10px;"><label>Notes</label><input type="text" id="ce-note" placeholder="Usage context, supplier…"></div>
+  <div class="form-row form-2">
+    <div class="field"><label>Time of production &amp; delivery</label><input type="text" id="ce-lead" placeholder="e.g. 3 weeks"></div>
+    <div class="field"><label>Notes</label><input type="text" id="ce-note" placeholder="Usage context, supplier…"></div>
+  </div>
   <div class="field" style="margin-bottom:10px;">
     <label>Locations (comma-separated, e.g. Paris HQ, Paris Stock, 16CS London)</label>
     <input type="text" id="ce-locs" placeholder="Paris HQ, Paris Stock">
@@ -641,6 +1073,22 @@ tbody tr:hover td{background:var(--cream);}
 </div>
 
 <style>.feedback{margin-top:10px;font-size:13px;color:var(--ok);font-style:italic;}</style>
+
+<!-- FIRST-RUN ONBOARDING -->
+<div class="modal-overlay" id="welcome-modal" style="display:none;">
+  <div class="modal" style="width:480px;">
+    <h3>👋 Welcome — let's keep your data safe</h3>
+    <p>This tracker saves everything in <strong>this browser only</strong>, on this device. There's no server yet, so your data isn't shared or synced automatically.</p>
+    <div class="alert alert-info" style="margin-bottom:0;">
+      <span>💾</span>
+      <div>Use <strong>Export JSON</strong> to back up your work, and <strong>Import JSON</strong> to restore it or share it with the team. The <strong>Backup &amp; Help</strong> page explains everything.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="dismissWelcome()">Got it</button>
+      <button class="btn btn-primary" onclick="dismissWelcome();nav('help');">Show me how</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -667,13 +1115,13 @@ const BASE_CATALOGUE = [
   {id:'br-annual',    cat:'Brochures',          name:'Annual Member Brochure',       threshold:20, note:'', locs:['Paris HQ','Paris Stock','16CS London']},
   {id:'br-journalist',cat:'Brochures',          name:'Journalist Brochure',          threshold:20, note:'For press operations', locs:['Paris HQ','Paris Stock','16CS London']},
   {id:'br-corporate', cat:'Brochures',          name:'Corporate Brochure',           threshold:20, note:'For Directors', locs:['Paris HQ','Paris Stock','16CS London']},
-  {id:'br-covers',    cat:'Brochures',          name:'Rigid Covers (Patron+Committee)',threshold:20,note:'Shared for patron & committee brochures', locs:['Paris HQ','Paris Stock']},
+  {id:'br-covers',    cat:'Brochures',          name:'Rigid Covers (Patron+Committee)',threshold:20,note:'Shared for patron & committee brochures', locs:['Paris HQ','Paris Stock','16CS London']},
   // Investor Brochures
-  {id:'br-uday',      cat:'Investor Brochures', name:'Brochure — Uday',              threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
-  {id:'br-aymeric',   cat:'Investor Brochures', name:'Brochure — Aymeric',           threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
-  {id:'br-salima',    cat:'Investor Brochures', name:'Brochure — Salima',            threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
-  {id:'br-hari',      cat:'Investor Brochures', name:'Brochure — Hari',              threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
-  {id:'br-akshat',    cat:'Investor Brochures', name:'Brochure — Akshat',            threshold:0, note:'Custom investor brochure', locs:['Paris HQ']},
+  {id:'br-uday',      cat:'Investor Brochures', name:'Brochure — Uday',              threshold:0, note:'Custom investor brochure', locs:['Paris HQ','16CS London']},
+  {id:'br-aymeric',   cat:'Investor Brochures', name:'Brochure — Aymeric',           threshold:0, note:'Custom investor brochure', locs:['Paris HQ','16CS London']},
+  {id:'br-salima',    cat:'Investor Brochures', name:'Brochure — Salima',            threshold:0, note:'Custom investor brochure', locs:['Paris HQ','16CS London']},
+  {id:'br-hari',      cat:'Investor Brochures', name:'Brochure — Hari',              threshold:0, note:'Custom investor brochure', locs:['Paris HQ','16CS London']},
+  {id:'br-akshat',    cat:'Investor Brochures', name:'Brochure — Akshat',            threshold:0, note:'Custom investor brochure', locs:['Paris HQ','16CS London']},
   // Welcome Pack Patron
   {id:'wp-box',       cat:'Welcome Pack — Patron',name:'Box & Fourreau Set',         threshold:10, note:'Sold together', locs:['MBE','Paris HQ']},
   {id:'wp-rest-br',   cat:'Welcome Pack — Patron',name:'Restaurant Brochure (pack)', threshold:4,  note:'In patron welcome pack', locs:['MBE','Paris HQ']},
@@ -696,11 +1144,11 @@ const BASE_CATALOGUE = [
   {id:'st-stationery',cat:'Stationery',         name:'Stationery & Office Supplies',          threshold:20, note:'Monthly check', locs:['Paris HQ','16CS London']},
   {id:'st-postcards', cat:'Stationery',         name:'Postcards (general)',           threshold:0,  note:'Log usage case by case', locs:['Paris HQ','Paris Stock','16CS London']},
   {id:'st-envelopes', cat:'Stationery',         name:'Envelopes',                     threshold:0,  note:'Log usage case by case', locs:['Paris HQ','Paris Stock']},
-  {id:'st-birthday',  cat:'Stationery',         name:'Birthday Cards',                threshold:0,  note:'Log usage case by case', locs:['Paris HQ']},
+  {id:'st-birthday',  cat:'Stationery',         name:'Birthday Cards',                threshold:0,  note:'Log usage case by case', locs:['Paris HQ','16CS London']},
   {id:'st-stickers',  cat:'Stationery',         name:'Stickers',                      threshold:100,note:'', locs:['Paris HQ','16CS London']},
   {id:'st-letterhead',cat:'Stationery',         name:'Letterheads',                   threshold:50, note:'', locs:['Paris HQ']},
   // Branded items that go to restaurants/events
-  {id:'bf-trinket',   cat:'Retail',             name:'Trinket Tray',                  threshold:5,  note:'Committee & Ambassador welcome gift', locs:['Paris HQ','Paris Stock']},
+  {id:'bf-trinket',   cat:'Retail',             name:'Trinket Tray',                  threshold:5,  note:'Committee & Ambassador welcome gift', locs:['Paris HQ','Paris Stock','16CS London']},
   // 16CS Crockery
   {id:'cr-espresso-saucer',  cat:'Crockery — 16CS', name:'Espresso Saucer',  threshold:2,  note:'', locs:['16CS London']},
   {id:'cr-espresso-cup',     cat:'Crockery — 16CS', name:'Espresso Cup',     threshold:2,  note:'', locs:['16CS London']},
@@ -746,6 +1194,8 @@ function getAllItems() {
 }
 function itemById(id) { return getAllItems().find(i=>i.id===id); }
 function itemName(id) { const i=itemById(id); return i?i.name:id; }
+function allCategories() { return [...new Set(getAllItems().map(i=>i.cat))]; }
+function catOptions(sel) { return '<option value="">— Category —</option>'+allCategories().map(c=>`<option value="${c}" ${c===sel?'selected':''}>${c}</option>`).join(''); }
 function totalStock(id) { return Object.values(state.stock[id]||{}).reduce((s,v)=>s+(v||0),0); }
 function stockAt(id,loc) { return (state.stock[id]||{})[loc]||0; }
 function pendingStock(id) { return (state.orders||[]).filter(o=>o.itemId===id&&o.status!=='Delivered').reduce((s,o)=>s+(o.qty||0),0); }
@@ -1220,7 +1670,7 @@ function addManualTodo() {
 // ══════════════════════════════════════════════════════════════════
 function renderLocation(loc, gridId) {
   const grid = document.getElementById(gridId);
-  const items = getAllItems().filter(i=>i.locs&&i.locs.includes(loc)&&i.cat!=='Chouquettes');
+  const items = getAllItems().filter(i=>i.cat!=='Chouquettes'&&(((i.locs||[]).includes(loc))||stockAt(i.id,loc)>0));
   const cats = [...new Set(items.map(i=>i.cat))];
   let html='';
   cats.forEach(cat => {
@@ -1262,19 +1712,23 @@ function initEventForm() {
   if(!eventItems.length) addEventItem();
   renderEventItems();
 }
-function addEventItem() { eventItems.push({id:uid(),itemId:'',qty:1,loc:'Paris HQ',note:''}); renderEventItems(); }
+function addEventItem() { eventItems.push({id:uid(),cat:'',itemId:'',qty:1,loc:'Paris HQ',note:''}); renderEventItems(); }
 function renderEventItems() {
   const container=document.getElementById('ev-items-container');
-  const evItems=getAllItems().filter(i=>i.cat==='Brochures'||i.cat==='Investor Brochures'||i.cat==='Event Materials'||i.cat==='Retail');
   container.innerHTML=eventItems.map((ei,idx)=>{
-    const sel=getAllItems().find(x=>x.id===ei.itemId);
-    const locs=sel?sel.locs.filter(l=>l!=='MBE'):BASE_LOCS.filter(l=>l!=='MBE');
+    const rowItems=getAllItems().filter(i=>!ei.cat||i.cat===ei.cat);
+    const locs=ALL_LOCS;
     return `<div style="background:var(--cream);border-radius:8px;padding:10px;margin-bottom:8px;">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+      <div style="display:grid;grid-template-columns:1.4fr 1.8fr 0.7fr 1fr 1.3fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+        <div class="field">${idx===0?'<label>Category</label>':''}
+          <select onchange="eventItems[${idx}].cat=this.value;eventItems[${idx}].itemId='';renderEventItems()">
+            ${catOptions(ei.cat)}
+          </select>
+        </div>
         <div class="field">${idx===0?'<label>Item</label>':''}
           <select onchange="eventItems[${idx}].itemId=this.value;renderEventItems()">
             <option value="">— Select —</option>
-            ${evItems.map(i=>`<option value="${i.id}" ${ei.itemId===i.id?'selected':''}>${i.name}</option>`).join('')}
+            ${rowItems.map(i=>`<option value="${i.id}" ${ei.itemId===i.id?'selected':''}>${i.name}</option>`).join('')}
           </select>
         </div>
         <div class="field">${idx===0?'<label>Qty</label>':''}
@@ -1322,7 +1776,7 @@ function submitEvent() {
     if(!ei.itemId||!ei.qty) return;
     plan.push({id:ei.itemId,loc:ei.loc||'Paris HQ',qty:ei.qty,note:ei.note});
     if(ei.withGift){
-      const gLoc=itemById('ev-bags')?.locs.includes(ei.loc)?ei.loc:'Paris HQ';
+      const gLoc=ei.loc||'Paris HQ';
       plan.push({id:'ev-bags',loc:gLoc,qty:ei.qty,note:'With item gift'});
       plan.push({id:'ev-splits',loc:gLoc,qty:ei.qty,note:'With item gift'});
     }
@@ -1379,19 +1833,23 @@ function initProspectForm() {
   if(!prospectItems.length) addProspectItem();
   renderProspectItems();
 }
-function addProspectItem() { prospectItems.push({id:uid(),itemId:'',qty:1,loc:'Paris HQ'}); renderProspectItems(); }
+function addProspectItem() { prospectItems.push({id:uid(),cat:'',itemId:'',qty:1,loc:'Paris HQ'}); renderProspectItems(); }
 function renderProspectItems() {
   const container=document.getElementById('pr-items-container');
-  const items=getAllItems().filter(i=>i.cat==='Brochures'||i.cat==='Investor Brochures'||i.cat==='Stationery');
   container.innerHTML=prospectItems.map((pi,idx)=>{
-    const sel=getAllItems().find(x=>x.id===pi.itemId);
-    const locs=sel?sel.locs.filter(l=>l!=='MBE'&&!RESTAURANTS.includes(l)):['Paris HQ','Paris Stock','16CS London'];
+    const rowItems=getAllItems().filter(i=>!pi.cat||i.cat===pi.cat);
+    const locs=ALL_LOCS;
     return `<div style="background:var(--cream);border-radius:8px;padding:10px;margin-bottom:8px;">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+      <div style="display:grid;grid-template-columns:1.4fr 1.8fr 0.7fr 1.2fr auto;gap:8px;align-items:end;margin-bottom:6px;">
+        <div class="field">${idx===0?'<label>Category</label>':''}
+          <select onchange="prospectItems[${idx}].cat=this.value;prospectItems[${idx}].itemId='';renderProspectItems()">
+            ${catOptions(pi.cat)}
+          </select>
+        </div>
         <div class="field">${idx===0?'<label>Item</label>':''}
           <select onchange="prospectItems[${idx}].itemId=this.value;renderProspectItems()">
             <option value="">— Select —</option>
-            ${items.map(i=>`<option value="${i.id}" ${pi.itemId===i.id?'selected':''}>${i.name}</option>`).join('')}
+            ${rowItems.map(i=>`<option value="${i.id}" ${pi.itemId===i.id?'selected':''}>${i.name}</option>`).join('')}
           </select>
         </div>
         <div class="field">${idx===0?'<label>Qty</label>':''}
@@ -1423,7 +1881,7 @@ function submitProspect() {
     if(!pi.itemId||!pi.qty) return;
     plan.push({id:pi.itemId,loc:pi.loc||'Paris HQ',qty:pi.qty});
     if(pi.withGift){
-      const gLoc=itemById('ev-bags')?.locs.includes(pi.loc)?pi.loc:'Paris HQ';
+      const gLoc=pi.loc||'Paris HQ';
       plan.push({id:'ev-bags',loc:gLoc,qty:pi.qty,note:'With item gift'});
       plan.push({id:'ev-splits',loc:gLoc,qty:pi.qty,note:'With item gift'});
     }
@@ -1535,7 +1993,7 @@ function updateManualItems() {
 function updateManualLocations() {
   const itemId=document.getElementById('me-item').value;
   const item=itemById(itemId);
-  const locs=item?item.locs:ALL_LOCS;
+  const locs=ALL_LOCS;
   document.getElementById('me-loc').innerHTML=locs.map(l=>`<option>${l}</option>`).join('');
   updateBagSplitPreview();
 }
@@ -1582,13 +2040,41 @@ function supplierOptions() {
   if(!state.suppliers) state.suppliers=[...DEFAULT_SUPPLIERS];
   return state.suppliers.map(s=>`<option>${s}</option>`).join('')+'<option value="__other__">Other (type below)</option>';
 }
-function openOrderModal() {
-  document.getElementById('ord-item').innerHTML=getAllItems().map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
-  document.getElementById('ord-supplier').innerHTML=supplierOptions();
-  document.getElementById('ord-date').value=today();
+let editingOrderId=null;
+function updateOrderItems() {
+  const cat=document.getElementById('ord-cat').value;
+  const items=getAllItems().filter(i=>!cat||i.cat===cat);
+  const cur=document.getElementById('ord-item').value;
+  document.getElementById('ord-item').innerHTML='<option value="">— Select item —</option>'+items.map(i=>`<option value="${i.id}" ${i.id===cur?'selected':''}>${i.name}</option>`).join('');
+}
+function openOrderModal(orderId) {
+  editingOrderId=orderId||null;
+  const ord=orderId?(state.orders||[]).find(o=>o.id===orderId):null;
+  document.getElementById('order-modal-title').textContent=ord?'Edit Purchase Order':'New Purchase Order';
+  document.getElementById('ord-cat').innerHTML=catOptions(ord?(itemById(ord.itemId)?.cat||''):'');
+  updateOrderItems();
+  document.getElementById('ord-loc').innerHTML=ALL_LOCS.map(l=>`<option>${l}</option>`).join('');
+  let supHtml=supplierOptions();
+  if(ord&&ord.supplier&&!(state.suppliers||[]).includes(ord.supplier)) supHtml=`<option>${ord.supplier}</option>`+supHtml;
+  document.getElementById('ord-supplier').innerHTML=supHtml;
+  if(ord){
+    document.getElementById('ord-item').value=ord.itemId;
+    document.getElementById('ord-loc').value=ord.loc||'Paris HQ';
+    document.getElementById('ord-qty').value=ord.qty||'';
+    document.getElementById('ord-budget').value=ord.budget||'';
+    document.getElementById('ord-price').value=ord.price||'';
+    document.getElementById('ord-supplier').value=ord.supplier||'';
+    document.getElementById('ord-date').value=ord.date||'';
+    document.getElementById('ord-est-delivery').value=ord.estDelivery||'';
+    document.getElementById('ord-actual-delivery').value=ord.actualDelivery||'';
+    document.getElementById('ord-notes').value=ord.notes||'';
+  } else {
+    ['ord-qty','ord-budget','ord-price','ord-est-delivery','ord-actual-delivery','ord-notes'].forEach(fid=>document.getElementById(fid).value='');
+    document.getElementById('ord-date').value=today();
+  }
   document.getElementById('order-modal').style.display='flex';
 }
-function closeOrderModal(){document.getElementById('order-modal').style.display='none';}
+function closeOrderModal(){editingOrderId=null;document.getElementById('order-modal').style.display='none';}
 function submitOrder() {
   const itemId=document.getElementById('ord-item').value;
   const loc=document.getElementById('ord-loc').value;
@@ -1603,17 +2089,31 @@ function submitOrder() {
   const notes=document.getElementById('ord-notes').value.trim();
   if(!itemId||!qty||!date){alert('Please fill in item, quantity and date.');return;}
   const delivered=!!actDel;
-  const ord={id:uid(),itemId,loc,qty,budget,price,supplier,date,estDelivery:estDel,actualDelivery:actDel,notes,status:delivered?'Delivered':'Ordered',deliveredDate:actDel||''};
-  state.orders.unshift(ord);
-  if(delivered) addStock(itemId,loc,qty,{type:'order',date:actDel||date,ref:`Order received — ${itemName(itemId)}`,details:`${qty} from ${supplier||'supplier'} → ${loc}`});
+  if(editingOrderId){
+    const ord=state.orders.find(o=>o.id===editingOrderId);
+    if(ord){
+      const prev={itemId:ord.itemId,loc:ord.loc,qty:ord.qty,delivered:ord.status==='Delivered'};
+      Object.assign(ord,{itemId,loc,qty,budget,price,supplier,date,estDelivery:estDel,actualDelivery:actDel,notes,status:delivered?'Delivered':'Ordered',deliveredDate:actDel||''});
+      if(prev.delivered&&(!delivered||prev.itemId!==itemId||prev.loc!==loc||prev.qty!==qty)){
+        deductStock(prev.itemId,prev.loc,prev.qty,{type:'order',date:today(),ref:`Order edited — ${itemName(prev.itemId)}`,details:`Previous delivery of ${prev.qty} → ${prev.loc} reversed`});
+        if(delivered) addStock(itemId,loc,qty,{type:'order',date:actDel,ref:`Order received — ${itemName(itemId)}`,details:`${qty} from ${supplier||'supplier'} → ${loc}`});
+      } else if(!prev.delivered&&delivered){
+        addStock(itemId,loc,qty,{type:'order',date:actDel,ref:`Order received — ${itemName(itemId)}`,details:`${qty} from ${supplier||'supplier'} → ${loc}`});
+      }
+    }
+  } else {
+    const ord={id:uid(),itemId,loc,qty,budget,price,supplier,date,estDelivery:estDel,actualDelivery:actDel,notes,status:delivered?'Delivered':'Ordered',deliveredDate:actDel||''};
+    state.orders.unshift(ord);
+    if(delivered) addStock(itemId,loc,qty,{type:'order',date:actDel||date,ref:`Order received — ${itemName(itemId)}`,details:`${qty} from ${supplier||'supplier'} → ${loc}`});
+  }
   saveState(); renderOrders(); updateTodoBadge();
   closeOrderModal();
 }
 function markDelivered(id) {
   const ord=state.orders.find(o=>o.id===id);
   if(!ord||ord.status==='Delivered') return;
-  const d=prompt('Delivery date (YYYY-MM-DD):',today()); if(!d) return;
-  ord.status='Delivered'; ord.deliveredDate=d;
+  const d=today();
+  ord.status='Delivered'; ord.deliveredDate=d; ord.actualDelivery=d;
   addStock(ord.itemId,ord.loc,ord.qty,{type:'order',date:d,ref:`Order received — ${itemName(ord.itemId)}`,details:`${ord.qty} from ${ord.supplier||'supplier'} → ${ord.loc}`});
   saveState(); renderOrders(); updateTodoBadge();
 }
@@ -1631,7 +2131,10 @@ function renderOrders() {
     <td>${fmtDate(o.estDelivery)}</td>
     <td style="font-size:11px;color:var(--ink-faint);max-width:150px;">${o.notes||'—'}</td>
     <td><span class="status-pill sp-pending">${o.status}</span></td>
-    <td><button class="btn btn-ghost" style="padding:3px 9px;font-size:11px;" onclick="markDelivered('${o.id}')">Mark Delivered</button></td>
+    <td><div style="display:flex;gap:6px;justify-content:flex-end;">
+      <button class="btn btn-ghost" style="padding:3px 9px;font-size:11px;" onclick="openOrderModal('${o.id}')">Edit</button>
+      <button class="btn btn-ghost" style="padding:3px 9px;font-size:11px;" onclick="markDelivered('${o.id}')">Mark Delivered</button>
+    </div></td>
   </tr>`).join('');
 }
 
@@ -1640,17 +2143,23 @@ function renderOrders() {
 // ══════════════════════════════════════════════════════════════════
 function initTransferForm() {
   if(!document.getElementById('tr-date').value) document.getElementById('tr-date').value=today();
-  const sel=document.getElementById('tr-item');
-  sel.innerHTML=getAllItems().map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
-  updateTransferLocs();
+  const catSel=document.getElementById('tr-cat');
+  catSel.innerHTML=catOptions(catSel.value);
+  updateTransferItems();
   renderTransfers();
 }
+function updateTransferItems() {
+  const cat=document.getElementById('tr-cat').value;
+  const items=getAllItems().filter(i=>!cat||i.cat===cat);
+  const cur=document.getElementById('tr-item').value;
+  document.getElementById('tr-item').innerHTML='<option value="">— Select item —</option>'+items.map(i=>`<option value="${i.id}" ${i.id===cur?'selected':''}>${i.name}</option>`).join('');
+  updateTransferLocs();
+}
 function updateTransferLocs() {
-  const id=document.getElementById('tr-item').value;
-  const item=itemById(id);
-  const locs=item?item.locs:ALL_LOCS;
-  document.getElementById('tr-from').innerHTML=locs.map(l=>`<option>${l}</option>`).join('');
-  document.getElementById('tr-to').innerHTML=locs.map(l=>`<option>${l}</option>`).join('');
+  const from=document.getElementById('tr-from'),to=document.getElementById('tr-to');
+  const fCur=from.value,tCur=to.value;
+  from.innerHTML='<option value="">— From —</option>'+ALL_LOCS.map(l=>`<option ${l===fCur?'selected':''}>${l}</option>`).join('');
+  to.innerHTML='<option value="">— To —</option>'+ALL_LOCS.map(l=>`<option ${l===tCur?'selected':''}>${l}</option>`).join('');
 }
 function submitTransfer() {
   const itemId=document.getElementById('tr-item').value;
@@ -1660,7 +2169,10 @@ function submitTransfer() {
   const date=document.getElementById('tr-date').value;
   const by=document.getElementById('tr-by').value.trim();
   const reason=document.getElementById('tr-reason').value.trim();
-  if(!itemId||!qty||!date||from===to){alert('Please fill all fields and ensure From ≠ To.');return;}
+  if(!itemId){alert('Please select an item.');return;}
+  if(!from||!to){alert('Please select both From and To locations.');return;}
+  if(from===to){alert('From and To must be different locations.');return;}
+  if(!qty||!date){alert('Please fill in quantity and date.');return;}
   const avail=stockAt(itemId,from);
   if(qty>avail){alert(`Only ${avail} units available at ${from}.`);return;}
   const meta=`By: ${by||'—'}. Reason: ${reason||'—'}`;
@@ -1835,6 +2347,7 @@ function renderCatalogue() {
       <td style="font-size:12px;color:var(--ink-faint);">${item.cat}</td>
       <td><span class="status-pill" style="background:${sc}22;color:${sc};">${sl}</span></td>
       <td class="td-num">${item.threshold||0}</td>
+      <td style="font-size:11px;color:var(--ink-faint);">${item.leadTime||'—'}</td>
       <td style="font-size:11px;color:var(--ink-faint);max-width:200px;">${locsDisplay}</td>
       <td class="td-num">${item.status==='development'?'—':tot}</td>
       <td style="text-align:center;">
@@ -1852,6 +2365,7 @@ function openCatalogueEdit(id) {
   document.getElementById('ce-status').value=item.status||'active';
   document.getElementById('ce-threshold').value=item.threshold||0;
   document.getElementById('ce-note').value=item.note||'';
+  document.getElementById('ce-lead').value=item.leadTime||'';
   document.getElementById('ce-locs').value=(item.locs||[]).join(', ');
   document.getElementById('catalogue-edit-modal').style.display='flex';
 }
@@ -1863,20 +2377,21 @@ function saveCatalogueEdit() {
   const status=document.getElementById('ce-status').value;
   const threshold=+document.getElementById('ce-threshold').value||0;
   const note=document.getElementById('ce-note').value.trim();
+  const leadTime=document.getElementById('ce-lead').value.trim();
   const locsRaw=document.getElementById('ce-locs').value;
   const locs=locsRaw.split(',').map(l=>l.trim()).filter(Boolean);
   if(!name){alert('Name is required.');return;}
   // Save as override (works for both base and custom items)
   const custom=(state.customItems||[]).find(i=>i.id===id);
   if(custom){
-    Object.assign(custom,{name,cat,status,threshold,note,locs});
+    Object.assign(custom,{name,cat,status,threshold,note,leadTime,locs});
     // Ensure stock slots exist for new locs
     if(!state.stock[id]) state.stock[id]={};
     locs.forEach(l=>{if(state.stock[id][l]===undefined) state.stock[id][l]=0;});
   } else {
     if(!state.catalogueOverrides) state.catalogueOverrides={};
     if(!state.catalogueOverrides[id]) state.catalogueOverrides[id]={};
-    Object.assign(state.catalogueOverrides[id],{name,cat,status,threshold,note,locs});
+    Object.assign(state.catalogueOverrides[id],{name,cat,status,threshold,note,leadTime,locs});
     // Ensure stock slots exist for new locs
     if(!state.stock[id]) state.stock[id]={};
     locs.forEach(l=>{if(state.stock[id][l]===undefined) state.stock[id][l]=0;});
@@ -1906,19 +2421,21 @@ function addCatalogueItem() {
   const stockQty=+document.getElementById('cat-stock').value||0;
   const budget=+document.getElementById('cat-budget').value||0;
   const note=document.getElementById('cat-note').value.trim();
+  const leadTime=document.getElementById('cat-lead').value.trim();
+  const initLoc=document.getElementById('cat-loc').value||'Paris HQ';
   if(!name){alert('Please enter an item name.');return;}
   const id='custom-'+uid();
-  const newItem={id,cat,name,threshold,note,locs:['Paris HQ'],status,budget,isCustom:true};
+  const newItem={id,cat,name,threshold,note,leadTime,locs:[initLoc],status,budget,isCustom:true};
   if(!state.customItems) state.customItems=[];
   state.customItems.push(newItem);
   if(!state.stock[id]) state.stock[id]={};
   if(stockQty>0){
-    state.stock[id]['Paris HQ']=stockQty;
-    state.history.unshift({id:uid(),type:'manual',date:today(),ref:`Initial stock — ${name}`,details:`Added on creation`,itemId:id,loc:'Paris HQ',delta:stockQty,ts:Date.now()});
+    state.stock[id][initLoc]=stockQty;
+    state.history.unshift({id:uid(),type:'manual',date:today(),ref:`Initial stock — ${name}`,details:`Added on creation`,itemId:id,loc:initLoc,delta:stockQty,ts:Date.now()});
   }
   saveState();
   showFeedback('cat-feedback',`✓ "${name}" added${status==='development'?' (In Development)':''}.`);
-  ['cat-name','cat-threshold','cat-stock','cat-budget','cat-note'].forEach(id=>document.getElementById(id).value='');
+  ['cat-name','cat-threshold','cat-stock','cat-budget','cat-lead','cat-note'].forEach(id=>document.getElementById(id).value='');
   renderCatalogue();
 }
 function removeCustomItem(id) {
@@ -1986,355 +2503,18 @@ function showFeedback(id,msg) {
 seedInitialStock();
 renderDashboard();
 updateTodoBadge();
+
+// First-run onboarding
+function dismissWelcome(){
+  document.getElementById('welcome-modal').style.display='none';
+  try{ localStorage.setItem('lesAmis_seenWelcome','1'); }catch(e){}
+}
+try{
+  if(!localStorage.getItem('lesAmis_seenWelcome')){
+    document.getElementById('welcome-modal').style.display='flex';
+  }
+}catch(e){}
 </script>
-<script>
-(async () => {
-  if (!document.title || !document.title.trim()) document.title = "retail_stock_tracker_v2";
-  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
-  // author CSS) keep source-order precedence over the baseline.
-  const baseCss = document.createElement('style');
-  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
-  document.head.prepend(baseCss);
-  if (document.readyState === 'loading') {
-    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
-  }
-  let ds = document.querySelector('deck-stage');
-  // whenDefined never resolves when nothing registers the element, so only
-  // await it when a <deck-stage> tag exists (and race a timeout regardless).
-  if (ds && !customElements.get('deck-stage')) {
-    try {
-      await Promise.race([
-        customElements.whenDefined('deck-stage'),
-        new Promise((r) => setTimeout(r, 3000)),
-      ]);
-    } catch (e) {}
-    ds = document.querySelector('deck-stage');
-  }
-  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
-  // DOMContentLoaded; settle on that subtree so React has rendered before
-  // print(). Non-DC pages fall through to weighing body.
-  const isDc = !ds && 'DCLogic' in window;
-  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
-  if (settleRoot) {
-    // Weigh only content children — skip script/style/template so inline
-    // Babel/CSS doesn't register as stable "content" before the framework
-    // has mounted anything.
-    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
-    const weigh = () => {
-      let text = 0, media = 0;
-      for (const c of settleRoot.children) {
-        const t = c.tagName;
-        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
-        text += (c.textContent || '').trim().length;
-        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
-      }
-      return text + media * 100;
-    };
-    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
-    // body can carry a static shell while async main content is pending, and
-    // #dc-root can carry the root DC's static text while child refs are still
-    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
-    // accept stability while a dc-runtime placeholder is present.
-    const isGeneric = settleRoot === document.body;
-    const deadline = Date.now() + 15000;
-    let last = -1, stable = 0;
-    while (Date.now() < deadline) {
-      const n = weigh();
-      const ready =
-        (!isGeneric || document.readyState === 'complete') &&
-        !settleRoot.querySelector('.sc-placeholder');
-      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
-      last = n;
-      await new Promise((r) => setTimeout(r, 250));
-    }
-  }
-  // Project support.js may predate runtime default-seeding; push via bridge.
-  if (isDc && window.__dcSetProps && window.__dcRootName) {
-    try {
-      const dpEl = document.querySelector('script[data-dc-script]');
-      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
-      const bag = {};
-      for (const k in meta)
-        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
-          bag[k] = meta[k].default;
-      if (Object.keys(bag).length) {
-        window.__dcSetProps(window.__dcRootName(), bag);
-        await new Promise((r) => setTimeout(r, 50));
-      }
-    } catch (e) {}
-  }
-  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
-  // IntersectionObserver fade-ins, and collapsed <details> don't render while
-  // off-screen, so a long page would print with them blank or closed. Open
-  // every <details>, force native-lazy images eager, and scroll the document
-  // through its full height to trip lazy-load + IO; then wait (bounded) for the
-  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
-  try {
-    for (const d of document.querySelectorAll('details')) d.open = true;
-    for (const img of document.querySelectorAll('img[loading="lazy"]'))
-      img.loading = 'eager';
-    const scroller = document.scrollingElement || document.documentElement;
-    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
-    const step = window.innerHeight || 800;
-    for (let y = 0; y <= full; y += step) {
-      window.scrollTo(0, y);
-      await new Promise((r) => requestAnimationFrame(r));
-    }
-    window.scrollTo(0, 0);
-    await Promise.race([
-      Promise.all(
-        [...document.images].map((img) =>
-          img.complete
-            ? null
-            : new Promise((res) => {
-                img.addEventListener('load', res, { once: true });
-                img.addEventListener('error', res, { once: true });
-              })
-        )
-      ),
-      new Promise((r) => setTimeout(r, 4000)),
-    ]);
-  } catch (e) {}
-  try { await document.fonts.ready; } catch (e) {}
-  // Jump every animation to its end state so print() never captures a slide
-  // mid-entrance. Ordering matters: the 0s-transition style must be live
-  // BEFORE data-deck-active is set so attribute-keyed transitions don't
-  // start a (now-0s) run from the pre-active base.
-  const st = document.createElement('style');
-  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
-  document.head.appendChild(st);
-  for (const d of document.querySelectorAll('deck-stage')) {
-    for (const c of d.children) {
-      const t = c.tagName;
-      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
-      c.setAttribute('data-deck-active', '');
-    }
-  }
-  // Re-append deck-stage's @page last so no author @page can add a margin and
-  // spill each full-bleed slide onto two sheets. Backstop for old copies.
-  if (ds) {
-    let pg = document.getElementById('deck-stage-print-page');
-    if (!pg) {
-      pg = document.createElement('style');
-      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
-        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
-    }
-    document.body.appendChild(pg);
-  }
-  try {
-    const sweep = () => {
-      for (const a of document.getAnimations()) {
-        try { a.finish(); } catch (e) {
-          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
-        }
-      }
-    };
-    sweep();
-    await new Promise((r) => requestAnimationFrame(r));
-    sweep();
-    await new Promise((r) => requestAnimationFrame(r));
-  } catch (e) {}
-  // Size the PDF page to the rendered design unless the file opted into
-  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
-  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
-  // frame itself loses only margin — its padding is INSIDE the measured
-  // rect and must stay, or content shifts and leaves a gap at bottom/right.
-  var __m = null;
-  try { __m = (() => {
-  var docEl = document.documentElement;
-  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
 
-  var ds = document.querySelector('deck-stage');
-  if (ds) {
-    var dw = Number(ds.getAttribute('width')) || 1920;
-    var dh = Number(ds.getAttribute('height')) || 1080;
-    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
-    var idx = typeof ds.index === 'number' ? ds.index : 0;
-    var frames = [];
-    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
-    return { kind: 'deck', doc: doc, frames: frames,
-      authored: frames.map(function(){return{width:true,height:true}}),
-      deck: { width: dw, height: dh, slideCount: n, index: idx },
-      signals: { paperPage: false, pxPage: false } };
-  }
 
-  var paperPage = false, pxPage = false;
-  var eachRule = function (fn) {
-    for (var s = 0; s < document.styleSheets.length; s++) {
-      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
-      for (var r = 0; r < rs.length; r++) {
-        fn(rs[r]);
-        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
-      }
-    }
-  };
-  eachRule(function (r) {
-    if (r.type !== 6) return;
-    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
-    if (!m) return;
-    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
-    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
-  });
-  var signals = { paperPage: paperPage, pxPage: pxPage };
-
-  var pxVal = function (v) {
-    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
-  };
-  var authoredPx = function (el, prop) {
-    if (pxVal(el.style[prop])) return true;
-    var attr = el.getAttribute(prop);
-    if (attr && /^\d+$/.test(attr)) return true;
-    var hit = false;
-    eachRule(function (r) {
-      if (hit || r.type !== 1 || !r.style) return;
-      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
-    });
-    return hit;
-  };
-
-  var el = document.body, rootPxW = false;
-  for (;;) {
-    var kids = [];
-    for (var c = 0; c < el.children.length; c++) {
-      var t = el.children[c].tagName;
-      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
-    }
-    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
-    el.setAttribute('data-om-frame-wrap', '');
-    el = kids[0];
-    rootPxW = authoredPx(el, 'width');
-    if (rootPxW) break;
-  }
-  if (!rootPxW) rootPxW = authoredPx(el, 'width');
-
-  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
-  // fixed sheet pretending to be paper — fall through and size to render.
-  if (paperPage && !rootPxW) {
-    return { kind: 'paper-doc', doc: doc, signals: signals,
-      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
-      authored: [{ width: false, height: false }] };
-  }
-
-  var sx = window.scrollX || 0, sy = window.scrollY || 0;
-  var rectOf = function (e) {
-    var r = e.getBoundingClientRect();
-    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
-    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
-    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
-  };
-
-  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
-  // AND height, all within ±2px of each other. Off unless the page opts in
-  // via data-om-multi-frame on the stop element — guards against card grids
-  // and pricing tables that match the geometry but aren't separate canvases.
-  if (el.hasAttribute('data-om-multi-frame')) {
-    var cands = [];
-    for (var k = 0; k < el.children.length; k++) {
-      var ch = el.children[k];
-      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
-      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
-      var rc = rectOf(ch);
-      if (rc.width < 2 || rc.height < 2) continue;
-      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
-      cands.push(rc);
-    }
-    if (cands.length >= 2) {
-      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
-      for (var q = 1; q < cands.length; q++)
-        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
-      if (ok) return { kind: 'multi-frame', doc: doc, signals: signals,
-        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
-    }
-  }
-
-  el.setAttribute('data-om-frame', '');
-  return { kind: 'single-canvas', doc: doc, signals: signals,
-    frames: [rectOf(el)],
-    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
-})(); } catch (e) {}
-  var frame = null;
-  if (__m && __m.kind === 'single-canvas') {
-    var f = __m.frames && __m.frames[0];
-    if (f && f.width >= 200 && f.height >= 200) {
-      frame = f;
-      var fst = document.createElement('style');
-      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
-        Math.ceil(f.height) + 'px;margin:0}' +
-        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
-        '[data-om-frame]{margin:0!important}}';
-      document.body.appendChild(fst);
-    }
-  }
-  // Relax break-inside on oversized elements. An element taller than a
-  // printable page can't honor break-inside: avoid — browsers either overflow
-  // it or push it whole to the next page, leaving a blank gap, then break it
-  // anyway at an arbitrary point. After the final layout (content revealed,
-  // animations jumped), find elements taller than a page that still compute
-  // break-inside: avoid and reset them to auto, so the browser breaks them at
-  // their children's boundaries instead (children keep their own avoid). PAGE_PX
-  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
-  // height minus our 0.5in margins — so only clearly-oversized elements are
-  // touched and under-page elements still stay whole. Skipped for decks (slides
-  // are sized to the page) and for fixed-size canvases (frame set, or an author
-  // px-based @page) — runs as before for flowing docs on letter/A4.
-  try {
-    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
-      const PAGE_PX = 1024;
-      // Our print defaults add a real @page margin only when the source has
-      // no @page of its own; computed style can't tell us (it reports screen
-      // media), so read the injected rule directly.
-      const defaults = document.querySelector('style[data-omelette-print-defaults]');
-      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
-      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
-      for (const el of document.body.querySelectorAll(SEL)) {
-        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
-          el.setAttribute('data-om-oversized', '');
-          // Fake-paged docs simulate sheets with over-tall break-after:page
-          // boxes; honoring the break spills half-blank pages and ends a
-          // colored box mid-sheet. Flow them, and (only when we own the page
-          // inset) drop the redundant padding/background via the rule below.
-          const cs = getComputedStyle(el);
-          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
-            el.setAttribute('data-om-fakepage', '');
-          }
-        }
-      }
-      const ost = document.createElement('style');
-      ost.textContent = '@media print{' +
-        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
-        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
-        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
-        '}';
-      document.head.appendChild(ost);
-    }
-  } catch (e) {}
-  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
-  // swap the CSS that triggers them for Preview-safe forms.
-  try {
-    for (const el of document.body.querySelectorAll('*')) {
-      const cs = getComputedStyle(el);
-
-      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
-        const outs = [], kept = [];
-        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
-          const t = s.trim();
-          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
-          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
-          else kept.push(t);
-        }
-        if (outs.length) {
-          el.style.setProperty('filter', outs.join(' '), 'important');
-          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
-        }
-      }
-
-      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
-      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
-    }
-  } catch (e) {}
-  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
-})();
-</script>
-</body>
-</html>
-
+</body></html>
