@@ -1714,18 +1714,18 @@ function renderRestaurantLocation() {
   const el = document.getElementById('loc-rest-content');
   let html='';
   RESTAURANTS.forEach(r => {
-    const sl=slug(r);
     html+=`<div style="margin-bottom:1.5rem;"><div class="cat-header">${r}</div><div class="stock-grid">`;
-    // Chouquettes
+    const seen=new Set();
+    // Chouquettes first (historic order)
     ['ch-box','ch-bag','ch-post'].forEach(id=>{
       const item=itemById(id);
-      if(item) html+=stockCardHtml(item,r);
+      if(item){ html+=stockCardHtml(item,r); seen.add(id); }
     });
-    // Event items held there
-    REST_EVENT_ITEMS.forEach(id=>{
-      const qty=stockAt(id,r);
-      if(qty>0||itemById(id).locs.includes(r)){
-        html+=stockCardHtml(itemById(id),r);
+    // Then every other item listed or stocked at this restaurant (event items, custom items, ...)
+    getAllItems().forEach(item=>{
+      if(seen.has(item.id)) return;
+      if((item.locs||[]).includes(r) || stockAt(item.id,r)>0){
+        html+=stockCardHtml(item,r); seen.add(item.id);
       }
     });
     html+=`</div></div>`;
@@ -2640,7 +2640,7 @@ try{
   if (!(window.claude && typeof window.claude.use === 'function')) return;
   var DOC='app/state', HISTORY_CAP=600;
   var ref=null, lastRev=null, readOnly=false, writing=false, pendingWrite=false,
-      timer=null, applying=false, gotFirstSnap=false;
+      timer=null, applying=false, gotFirstSnap=false, dirty=false;
 
   var pill=document.createElement('span');
   pill.id='sync-pill';
@@ -2696,11 +2696,11 @@ try{
     var rev=uid();
     lastRev=rev;
     ref.set({rev:rev, ts:Date.now(), state:trimmedState()}).then(function(){
-      writing=false; setPill('live');
+      writing=false; setPill('live'); if(!pendingWrite) dirty=false;
       if(pendingWrite){ pendingWrite=false; schedule(); }
     }, function(e){
       writing=false;
-      if(e && e.code==='invalid_argument'){ readOnly=true; setPill('ro');
+      if(e && e.code==='invalid_argument'){ readOnly=true; dirty=false; setPill('ro');
         var bt=document.getElementById('local-banner-text');
         if(bt) bt.innerHTML='<strong>Read-only access.</strong> You can see the live team data, but your own changes stay in this browser and are NOT shared. Ask the owner for \u201cCan interact\u201d access.';
         uiToast('Read-only access — your changes are not shared with the team.','warn'); }
@@ -2712,7 +2712,7 @@ try{
   function schedule(){ clearTimeout(timer); timer=setTimeout(flush, 700); }
 
   var origSave=saveState;
-  saveState=function(){ origSave(); if(!applying) schedule(); };
+  saveState=function(){ origSave(); if(!applying){ if(!readOnly) dirty=true; schedule(); } };
 
   var appliedOnce=false;
   function applyRemote(data){
@@ -2739,6 +2739,7 @@ try{
       liveCopy();
       if(snap.metadata && snap.metadata.hasPendingWrites) return;
       if(!snap.exists){ if(first) schedule(); return; }   /* first-ever open seeds the store */
+      if(dirty||writing||pendingWrite) return;            /* never let a snapshot overwrite unsent local edits */
       var data=snap.data();
       if(data && data.rev && data.rev===lastRev) return;  /* our own confirmed write */
       lastRev=data && data.rev || null;
@@ -2757,7 +2758,7 @@ try{
   if (window.claude && typeof window.claude.use === 'function') return;
   var API='/api/state', HISTORY_CAP=600, POLL_MS=5000;
   var lastRev=null, writing=false, pendingWrite=false, timer=null,
-      applying=false, live=false, appliedOnce=false;
+      applying=false, live=false, appliedOnce=false, dirty=false;
 
   var pill=document.createElement('span');
   pill.id='sync-pill';
@@ -2826,7 +2827,7 @@ try{
     var rev=uid();
     lastRev=rev;
     fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:rev,state:trimmedState()})})
-      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); setPill('live'); })
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); setPill('live'); if(!pendingWrite) dirty=false; })
       .catch(function(){ setPill('err'); })
       .then(function(){ writing=false; if(pendingWrite){ pendingWrite=false; schedule(); } });
   }
@@ -2838,7 +2839,7 @@ try{
     if(document.hidden) return;
     fetch(API,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(doc){
       if(!live){ live=true; mountPill(); setPill('live'); liveCopy(); }
-      if(writing||pendingWrite) return;
+      if(dirty||writing||pendingWrite) return; /* never let a stale poll overwrite unsent local edits */
       if(doc && doc.rev && doc.rev!==lastRev){ lastRev=doc.rev; applyRemote(doc); }
       else if(!doc && !appliedOnce){ appliedOnce=true; schedule(); } /* empty store: seed with local */
     }).catch(function(){ if(live) setPill('err'); });
@@ -2847,7 +2848,7 @@ try{
   /* probe once; only take over saveState when the API exists */
   fetch(API,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(doc){
     live=true; mountPill(); setPill('live'); liveCopy();
-    saveState=function(){ origSave(); if(!applying) schedule(); };
+    saveState=function(){ origSave(); if(!applying){ dirty=true; schedule(); } };
     if(doc && doc.rev){ lastRev=doc.rev; applyRemote(doc); appliedOnce=true; }
     else { appliedOnce=true; schedule(); }
     setInterval(poll, POLL_MS);
