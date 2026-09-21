@@ -1222,6 +1222,7 @@ function getAllItems() {
   const overrides = state.catalogueOverrides||{};
   return [...BASE_CATALOGUE.map(item => overrides[item.id] ? {...item,...overrides[item.id]} : item), ...(state.customItems||[])];
 }
+function activeItems(){ return getAllItems().filter(i=>i.status!=='discontinued'); }
 function itemById(id) { return getAllItems().find(i=>i.id===id); }
 function itemName(id) { const i=itemById(id); return i?i.name:id; }
 function allCategories() { return [...new Set(getAllItems().map(i=>i.cat))]; }
@@ -1442,7 +1443,7 @@ function renderDashboard() {
 
   const openOrders = (state.orders||[]).filter(o=>o.status!=='Delivered').length;
   document.getElementById('dash-kpis').innerHTML = `
-    <div class="kpi"><div class="kpi-label">Items tracked</div><div class="kpi-val">${getAllItems().filter(i=>i.status!=='development').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Items tracked</div><div class="kpi-val">${activeItems().filter(i=>i.status!=='development').length}</div></div>
     <div class="kpi"><div class="kpi-label">To Do items</div><div class="kpi-val ${todos.length>0?'danger':''}">${todos.length}</div></div>
     <div class="kpi"><div class="kpi-label">Open orders</div><div class="kpi-val ${openOrders>0?'warn':''}">${openOrders}</div></div>
     <div class="kpi"><div class="kpi-label">Total movements</div><div class="kpi-val">${(state.history||[]).length}</div></div>
@@ -1456,7 +1457,7 @@ function renderDashGrid() {
   const locMap = {hq:'Paris HQ', stock:'Paris Stock', london:'16CS London', mbe:'MBE'};
 
   if (currentDashTab === 'overview') {
-    const items = getAllItems();
+    const items = activeItems();
     const cats = [...new Set(items.map(i=>i.cat))];
     let html = '';
     cats.forEach(cat => {
@@ -1470,9 +1471,9 @@ function renderDashGrid() {
           const post = stockAt('ch-post', r);
           const thr  = (getAllItems().find(i=>i.id==='ch-box')?.threshold)||20;
           const minQ = Math.min(box,bag,post);
-          const isLow = minQ < thr;
-          html += `<div class="stock-card ${isLow?'low':''}">
-            ${isLow?'<span class="sc-badge badge-low">LOW</span>':''}
+          const isLow = minQ < thr, isWarn = minQ === thr;
+          html += `<div class="stock-card ${isLow?'low':isWarn?'warn':''}">
+            ${isLow?'<span class="sc-badge badge-low">LOW</span>':isWarn?'<span class="sc-badge badge-warn">AT MIN</span>':''}
             <div class="sc-name">${r}</div>
             <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Box: <strong>${box}</strong> · Bag: <strong>${bag}</strong> · Post: <strong>${post}</strong></div>
             <div class="sc-threshold">Min ${thr} per restaurant</div>
@@ -1504,12 +1505,12 @@ function renderDashGrid() {
     }
     RESTAURANTS.forEach(r => {
       const box=stockAt('ch-box',r), bag=stockAt('ch-bag',r), post=stockAt('ch-post',r);
-      const isLow=Math.min(box,bag,post)<choqThr;
+      const minQ=Math.min(box,bag,post), isLow=minQ<choqThr, isWarn=minQ===choqThr;
       html += `<div style="margin-bottom:1.25rem;">
         <div class="cat-header">${r}</div>
         <div class="stock-grid">
-        <div class="stock-card ${isLow?'low':''}">
-          ${isLow?'<span class="sc-badge badge-low">LOW</span>':''}
+        <div class="stock-card ${isLow?'low':isWarn?'warn':''}">
+          ${isLow?'<span class="sc-badge badge-low">LOW</span>':isWarn?'<span class="sc-badge badge-warn">AT MIN</span>':''}
           <div class="sc-name">Chouquette Set</div>
           <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Box: <strong>${box}</strong> · Bag: <strong>${bag}</strong> · Post: <strong>${post}</strong></div>
           <div class="sc-threshold">Min ${choqThr} per restaurant</div>
@@ -1532,7 +1533,7 @@ function renderDashGrid() {
       'MBE': ['Welcome Pack — Patron','Welcome Pack — Annual'],
     };
     const allowedCats = locFilters[loc] || null; // null = show all
-    const items = getAllItems().filter(i=>i.locs&&i.locs.includes(loc));
+    const items = activeItems().filter(i=>i.locs&&i.locs.includes(loc));
     const cats = [...new Set(items.map(i=>i.cat))].filter(cat=> !allowedCats || allowedCats.includes(cat));
     let html = '';
     cats.forEach(cat => {
@@ -1557,8 +1558,8 @@ function stockCardHtml(item, specificLoc=null) {
   const qty = specificLoc ? stockAt(item.id, specificLoc) : totalStock(item.id);
   const pending = pendingStock(item.id);
   const isDev = item.status==='development';
-  const isLow = !isDev && item.threshold>0 && qty<=item.threshold;
-  const isWarn = !isDev && item.threshold>0 && qty<=item.threshold*1.5 && qty>item.threshold;
+  const isLow = !isDev && item.threshold>0 && qty<item.threshold;    // below minimum → red
+  const isWarn = !isDev && item.threshold>0 && qty===item.threshold; // exactly at minimum → orange
   const cls = isDev?'dev':isLow?'low':isWarn?'warn':'';
   const pct = item.threshold>0 ? Math.min(100,(qty/Math.max(item.threshold*3,qty||1))*100) : 100;
   const barCol = isLow?'var(--danger)':isWarn?'var(--warn)':'var(--ok)';
@@ -1566,7 +1567,7 @@ function stockCardHtml(item, specificLoc=null) {
     ${isDev?'<span class="sc-badge badge-dev">DEV</span>':''}
     ${!isDev&&isLow&&qty===0?'<span class="sc-badge badge-low">OUT</span>':''}
     ${!isDev&&isLow&&qty>0?'<span class="sc-badge badge-low">LOW</span>':''}
-    ${!isDev&&isWarn?'<span class="sc-badge badge-warn">LOW</span>':''}
+    ${!isDev&&isWarn?'<span class="sc-badge badge-warn">AT MIN</span>':''}
     ${pending>0?`<span class="sc-badge badge-order" style="top:28px">+${pending} ord.</span>`:''}
     <div class="sc-name">${item.name}</div>
     <div class="sc-qty ${isDev?'':''+cls}">${isDev?'—':qty}</div>
@@ -1580,7 +1581,7 @@ function stockCardHtml(item, specificLoc=null) {
 // ══════════════════════════════════════════════════════════════════
 function getPendingTodos() {
   const todos = [];
-  getAllItems().forEach(item => {
+  activeItems().forEach(item => {
     if (!item.threshold || item.threshold <= 0 || item.status==='development') return;
     if (item.id === 'ev-nametags') {
       const tot = totalStock(item.id);
@@ -1700,7 +1701,7 @@ function addManualTodo() {
 // ══════════════════════════════════════════════════════════════════
 function renderLocation(loc, gridId) {
   const grid = document.getElementById(gridId);
-  const items = getAllItems().filter(i=>i.cat!=='Chouquettes'&&(((i.locs||[]).includes(loc))||stockAt(i.id,loc)>0));
+  const items = activeItems().filter(i=>i.cat!=='Chouquettes'&&(((i.locs||[]).includes(loc))||stockAt(i.id,loc)>0));
   const cats = [...new Set(items.map(i=>i.cat))];
   let html='';
   cats.forEach(cat => {
@@ -1722,7 +1723,7 @@ function renderRestaurantLocation() {
       if(item){ html+=stockCardHtml(item,r); seen.add(id); }
     });
     // Then every other item listed or stocked at this restaurant (event items, custom items, ...)
-    getAllItems().forEach(item=>{
+    activeItems().forEach(item=>{
       if(seen.has(item.id)) return;
       if((item.locs||[]).includes(r) || stockAt(item.id,r)>0){
         html+=stockCardHtml(item,r); seen.add(item.id);
