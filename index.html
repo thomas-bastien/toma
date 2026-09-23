@@ -704,7 +704,7 @@ tbody tr:hover td{background:var(--cream);}
       <div class="field"><label>Restaurant</label>
         <select id="rest-name" onchange="previewRestaurantDeduction()">
           <option>Loulou Paris</option><option>Loulou Ramatuelle</option><option>Loulou Pirate</option>
-          <option>Loulou Courchevel</option><option>Le Flandrin</option><option>Ralph's</option><option>Grand Café</option>
+          <option>Loulou Courchevel</option><option>Loulou St Barth</option><option>Le Flandrin</option><option>Ralph's</option><option>Grand Café</option>
         </select>
       </div>
       <div class="field"><label>Period</label><input type="month" id="rest-period"></div>
@@ -879,6 +879,7 @@ tbody tr:hover td{background:var(--cream);}
         <label class="loc-check"><input type="checkbox" value="Loulou Ramatuelle" class="cat-loc-cb">Loulou Ramatuelle</label>
         <label class="loc-check"><input type="checkbox" value="Loulou Pirate" class="cat-loc-cb">Loulou Pirate</label>
         <label class="loc-check"><input type="checkbox" value="Loulou Courchevel" class="cat-loc-cb">Loulou Courchevel</label>
+        <label class="loc-check"><input type="checkbox" value="Loulou St Barth" class="cat-loc-cb">Loulou St Barth</label>
         <label class="loc-check"><input type="checkbox" value="Le Flandrin" class="cat-loc-cb">Le Flandrin</label>
         <label class="loc-check"><input type="checkbox" value="Ralph&#39;s" class="cat-loc-cb">Ralph&#39;s</label>
         <label class="loc-check"><input type="checkbox" value="Grand Café" class="cat-loc-cb">Grand Café</label>
@@ -1090,6 +1091,7 @@ tbody tr:hover td{background:var(--cream);}
       <label class="loc-check"><input type="checkbox" value="Loulou Ramatuelle" class="ce-loc-cb">Loulou Ramatuelle</label>
       <label class="loc-check"><input type="checkbox" value="Loulou Pirate" class="ce-loc-cb">Loulou Pirate</label>
       <label class="loc-check"><input type="checkbox" value="Loulou Courchevel" class="ce-loc-cb">Loulou Courchevel</label>
+      <label class="loc-check"><input type="checkbox" value="Loulou St Barth" class="ce-loc-cb">Loulou St Barth</label>
       <label class="loc-check"><input type="checkbox" value="Le Flandrin" class="ce-loc-cb">Le Flandrin</label>
       <label class="loc-check"><input type="checkbox" value="Ralph&#39;s" class="ce-loc-cb">Ralph's</label>
       <label class="loc-check"><input type="checkbox" value="Grand Café" class="ce-loc-cb">Grand Café</label>
@@ -1129,7 +1131,7 @@ tbody tr:hover td{background:var(--cream);}
 // availability checks before every deduction; transfers now log both legs;
 // reorder alerts are total-based (less noise); mobile nav drawer; Add Item
 // now lists every category. Search "Option A" for the touched spots.
-const RESTAURANTS = ['Loulou Paris','Loulou Ramatuelle','Loulou Pirate','Loulou Courchevel','Le Flandrin',"Ralph's",'Grand Café'];
+const RESTAURANTS = ['Loulou Paris','Loulou Ramatuelle','Loulou Pirate','Loulou Courchevel','Loulou St Barth','Le Flandrin',"Ralph's",'Grand Café'];
 const BASE_LOCS = ['Paris HQ','Paris Stock','16CS London','MBE'];
 const ALL_LOCS = [...BASE_LOCS, ...RESTAURANTS];
 const DEFAULT_SUPPLIERS = ['Huong Vietnam','Maxim Computer','CopyShop','Imprimerie Magenta','Art Concept','Amazon','Loulou Retail'];
